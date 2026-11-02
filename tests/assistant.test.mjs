@@ -51,3 +51,11 @@ test('entradas maliciosas, desconhecidas ou excessivas não viram HTML nem instr
  }
  assert.equal(answerQuestion('Como jogar?',null).topic,'fallback');
 });
+
+test('pergunta sobre quem está ganhando não inventa placar em tempo real',()=>{
+ for(const question of ['Quem está ganhando?', 'Estou vencendo agora?', 'Qual o resultado atual?', 'Como está meu desempenho nesta partida?']){
+  const response=answerQuestion(question,snake);
+  assert.equal(response.topic,'situacao',question);
+  assert.match(response.answer,/não acompanha a partida em tempo real/);
+ }
+});
