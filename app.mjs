@@ -43,6 +43,21 @@ export function suggestGame(games,random=Math.random){
  const idx=Number.isFinite(n)?Math.min(games.length-1,Math.max(0,Math.floor(n*games.length))):0;
  return games[idx];
 }
+/** Plano determinístico a partir de informações já documentadas no catálogo. */
+export function planForGame(game){
+ if(!game||typeof game.id!=='string'||typeof game.name!=='string')return null;
+ if(![game.description,game.help,game.hint].some(x=>typeof x==='string'&&x.trim()))return null;
+ const clean=(value,limit=420)=>String(value??'').replace(/<[^>]*>/g,'').replace(/\bon\w+\s*=/gi,'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,limit);
+ const name=clean(game.name,100)||'jogo selecionado';
+ return {
+  gameId:game.id,
+  steps:[
+   '1. Objetivo de '+name+': '+(clean(game.description)||'Consulte o objetivo exibido na arena.'),
+   '2. Controles de '+name+': '+(clean(game.help)||'Confira os comandos oferecidos pelo jogo antes de agir.'),
+   '3. Dica de '+name+': '+(clean(game.hint)||'Revise as instruções e os recursos disponíveis antes da próxima jogada.')
+  ]
+ };
+}
 export function answerQuestion(question,game){
  const q=bounded(question);
  const fallback='Posso explicar o objetivo, os controles, dar uma dica, falar de reinício, modo offline, acessibilidade e recordes. Escolha um assunto ou tente outra pergunta.';
@@ -165,6 +180,15 @@ function initDocument(){
   $('search').value=next.name;
   renderChoices(next.id);
   $('action-status').textContent='Sugestão selecionada: '+next.name+'. Abra a partida ou peça uma dica.';
+ });
+ $('plan-game').addEventListener('click',()=>{
+  const plan=planForGame(selected);
+  if(!plan){
+   $('action-status').textContent='Selecione um jogo com instruções disponíveis para montar um plano.';
+   return;
+  }
+  $('action-status').textContent='Plano de partida montado com as instruções do catálogo.';
+  addMessage('Plano para '+selected.name+':\n'+plan.steps.join('\n'),'bot');
  });
  $('share-game').addEventListener('click',async()=>{
   const link=contextUrl(selected);
