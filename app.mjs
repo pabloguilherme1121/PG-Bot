@@ -59,6 +59,23 @@ export function planForGame(game){
   ]
  };
 }
+/** Guia portátil, gerado no navegador sem enviar perguntas ou estado da partida. */
+export function offlineGuide(game){
+ if(!game||!['arcade','estrategia'].includes(game.environment)||typeof game.id!=='string'||!/^[a-z0-9][a-z0-9-]{0,63}$/.test(game.id))return null;
+ const plan=planForGame(game);
+ if(!plan)return null;
+ let url;
+ try{url=new URL(game.url)}catch{return null}
+ if(url.origin!=='https://pabloguilherme1121.github.io'||!url.pathname.startsWith(game.environment==='arcade'?'/PG-Arcade/':'/PG-Estrategia/'))return null;
+ const content=[
+  'PG BOT | GUIA DE PARTIDA',
+  ...plan.steps,
+  'Abrir o jogo: '+url.href,
+  'Este guia não acompanha placares, turnos ou progresso em tempo real. Confira a partida para dados atuais.',
+  'Orientações locais baseadas no catálogo PG. Não contém mensagens da conversa nem dados pessoais.'
+ ].join('\n\n')+'\n';
+ return {filename:'pg-bot-'+game.environment+'-'+game.id+'.txt',content};
+}
 export function answerQuestion(question,game){
  const q=bounded(question);
  const fallback='Posso explicar o objetivo, os controles, dar uma dica, falar de reinício, modo offline, acessibilidade e recordes. Escolha um assunto ou tente outra pergunta.';
@@ -111,6 +128,7 @@ function initDocument(){
   if(u.hostname==='pabloguilherme1121.github.io'&&(u.pathname.startsWith('/PG-Arcade/')||u.pathname.startsWith('/PG-Estrategia/'))) $('link').href=u.href;
   $('link').hidden=!selected;
   $('share-game').disabled=!selected;
+  $('download-guide').disabled=!offlineGuide(selected);
   const isFavorite=!!selected&&favorites.has(favoriteKey(selected));
   $('favorite-game').disabled=!selected;
   $('favorite-game').setAttribute('aria-pressed',String(isFavorite));
@@ -225,6 +243,22 @@ function initDocument(){
   $('action-status').textContent='Plano de partida montado com as instruções do catálogo.';
   rememberRecent(selected);
   addMessage('Plano para '+selected.name+':\n'+plan.steps.join('\n'),'bot');
+ });
+ $('download-guide').addEventListener('click',()=>{
+  const guide=offlineGuide(selected);
+  if(!guide){$('action-status').textContent='Selecione um jogo com instruções para salvar o guia.';return;}
+  const objectUrl=URL.createObjectURL(new Blob([guide.content],{type:'text/plain;charset=utf-8'}));
+  const anchor=document.createElement('a');
+  anchor.href=objectUrl;anchor.download=guide.filename;
+  anchor.hidden=true;document.body.append(anchor);
+  try{
+   anchor.click();
+   rememberRecent(selected);
+   $('action-status').textContent='Guia salvo como '+guide.filename+'. O arquivo contém somente orientações do catálogo.';
+  }finally{
+   anchor.remove();
+   window.setTimeout(()=>URL.revokeObjectURL(objectUrl),1000);
+  }
  });
  $('share-game').addEventListener('click',async()=>{
   const link=contextUrl(selected);
