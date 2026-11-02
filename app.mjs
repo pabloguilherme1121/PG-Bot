@@ -1,6 +1,7 @@
 // PG Bot independente: somente regras locais, sem token, cookies ou API de conversação.
 import {favoriteKey,loadFavoriteKeys,saveFavoriteKeys,toggleFavoriteKey,favoriteGames} from './favorites.mjs';
 import {addRecent,loadRecent,saveRecent,recentGames} from './recent.mjs';
+import {LIVE_CHANNEL,parseLiveTick,isLiveForSelection,liveSummary,LIVE_TTL_MS} from './live-telemetry.mjs';
 export const normalize = text => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 const bounded=text=>typeof text==='string'&&text.length<=240?normalize(text):'';
 export function filterGames(games,environment,search='',kind='all'){
@@ -107,6 +108,34 @@ const selectors={
 function initDocument(){
  const $=key=>document.getElementById(selectors[key]||key);
  let games=[],environment='arcade',selected=null,kind='all',favorites=new Set(),favoritesOnly=false,recent=[];
+ let liveChannel=null,liveTick=null,liveWatch=null;
+ function showLive(){
+  const status=$('live-status');
+  if(!$('live-enable').checked){status.textContent='Desativado. Ative esta opção e a transmissão dentro do jogo.';return;}
+  if(!liveTick||!isLiveForSelection(liveTick,selected)){
+   status.textContent=liveTick&&Date.now()-liveTick.timestamp>LIVE_TTL_MS?'Dados expirados. Confira se a aba do jogo continua ativa.':'Aguardando dados de Domínio Territorial para o jogo selecionado.';
+   return;
+  }
+  status.textContent='Dados recebidos nesta aba: '+liveSummary(liveTick)+' Atualizado há '+Math.max(0,Math.floor((Date.now()-liveTick.timestamp)/1000))+' s.';
+ }
+ $('live-enable').addEventListener('change',()=>{
+  if(liveWatch){clearInterval(liveWatch);liveWatch=null;}
+  liveChannel?.close();liveChannel=null;liveTick=null;
+  if($('live-enable').checked){
+   if(typeof BroadcastChannel!=='function'){$('live-enable').checked=false;$('live-status').textContent='Este navegador não suporta comunicação entre abas.';return;}
+   liveChannel=new BroadcastChannel(LIVE_CHANNEL);
+   liveChannel.onmessage=event=>{
+    const tick=parseLiveTick(event.data);
+    if(!tick||!selected||!games.some(g=>g.environment===tick.project&&g.id===tick.gameId))return;
+    if(tick.project!==selected.environment||tick.gameId!==selected.id)return;
+    liveTick=tick;showLive();
+   };
+   liveWatch=setInterval(showLive,3000);
+  }
+  showLive();
+ });
+ window.addEventListener('pagehide',()=>{liveChannel?.close();if(liveWatch)clearInterval(liveWatch)});
+
  const url=new URL(location.href);
  const requestedEnvironment=url.searchParams.get('projeto');
  const requestedId=url.searchParams.get('jogo');
@@ -129,6 +158,7 @@ function initDocument(){
   $('link').hidden=!selected;
   $('share-game').disabled=!selected;
   $('download-guide').disabled=!offlineGuide(selected);
+  showLive();
   const isFavorite=!!selected&&favorites.has(favoriteKey(selected));
   $('favorite-game').disabled=!selected;
   $('favorite-game').setAttribute('aria-pressed',String(isFavorite));
@@ -200,7 +230,10 @@ function initDocument(){
   const q=typeof text==='string'?text.trim():'';
   if(!q||q.length>240)return;
   addMessage(q,'user');
-  const reply=answerQuestion(q,selected);
+  const asksLive=/(?:meu turno|turno atual|placar atual|pontua(?:ção|cao) atual|situa(?:ção|cao) atual|minha partida)/i.test(q);
+  const reply=asksLive&&$('live-enable').checked&&isLiveForSelection(liveTick,selected)
+   ? {topic:'situacao',answer:'Resumo local recebido da aba da partida: '+liveSummary(liveTick)+' Confira o jogo para confirmar o estado atual.'}
+   : answerQuestion(q,selected);
   if(selected)rememberRecent(selected);
   addMessage(reply.answer,'bot');
   $('question').value='';
