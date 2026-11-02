@@ -3,7 +3,7 @@ const html=readFileSync('index.html','utf8');
 const css=readFileSync('styles.css','utf8');
 const js=readFileSync('app.mjs','utf8');
 const data=JSON.parse(readFileSync('data/games.json','utf8'));
-const files=['index.html','app.mjs','favorites.mjs','recent.mjs','styles.css','icon.svg','manifest.webmanifest','sw.js','data/games.json','brand/pg-bot/mascot.webp'];
+const files=['index.html','app.mjs','favorites.mjs','recent.mjs','live-telemetry.mjs','styles.css','icon.svg','manifest.webmanifest','sw.js','data/games.json','brand/pg-bot/mascot.webp'];
 for(const path of files)if(!existsSync(path))throw Error('Recurso ausente: '+path);
 for(const token of ['id="chat-form"','id="game-select"','id="game-search"','id="chat-log"','id="game-kind"','id="random-game"','id="plan-game"','id="favorite-game"','id="favorites-only"','id="recent-games"','id="clear-recent"','id="share-game"','id="download-guide"','id="clear-chat"','data-environment="arcade"','data-environment="estrategia"'])if(!html.includes(token))throw Error('Elemento ausente: '+token);
 if(html.includes('http://')||js.includes('eval(')||js.includes('innerHTML'))throw Error('Padrão inseguro no site');
