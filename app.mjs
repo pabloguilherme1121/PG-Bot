@@ -1,5 +1,6 @@
 // PG Bot independente: somente regras locais, sem token, cookies ou API de conversação.
 import {favoriteKey,loadFavoriteKeys,saveFavoriteKeys,toggleFavoriteKey,favoriteGames} from './favorites.mjs';
+import {addRecent,loadRecent,saveRecent,recentGames} from './recent.mjs';
 export const normalize = text => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 const bounded=text=>typeof text==='string'&&text.length<=240?normalize(text):'';
 export function filterGames(games,environment,search='',kind='all'){
@@ -88,7 +89,7 @@ const selectors={
 };
 function initDocument(){
  const $=key=>document.getElementById(selectors[key]||key);
- let games=[],environment='arcade',selected=null,kind='all',favorites=new Set(),favoritesOnly=false;
+ let games=[],environment='arcade',selected=null,kind='all',favorites=new Set(),favoritesOnly=false,recent=[];
  const url=new URL(location.href);
  const requestedEnvironment=url.searchParams.get('projeto');
  const requestedId=url.searchParams.get('jogo');
@@ -120,6 +121,36 @@ function initDocument(){
   else current.searchParams.delete('jogo');
   history.replaceState(null,'',current.pathname+current.search+current.hash);
  }
+ function renderRecent(){
+  const container=$('recent-games');
+  const previous=recentGames(games,recent);
+  const fragment=document.createDocumentFragment();
+  $('clear-recent').disabled=previous.length===0;
+  if(!previous.length){
+   const empty=document.createElement('p');
+   empty.className='recent-empty';
+   empty.textContent='Nenhum título consultado ainda.';
+   fragment.append(empty);
+  }
+  for(const game of previous){
+   const button=document.createElement('button');
+   button.type='button';
+   button.className='recent-button';
+   button.textContent='PG '+(game.environment==='arcade'?'Arcade':'Estratégia')+' · '+game.name;
+   button.addEventListener('click',()=>{
+    setEnvironment(game.environment,game.id,true);
+    rememberRecent(game);
+    $('action-status').textContent='Contexto recuperado: '+game.name+'. Consulte o guia ou abra a partida.';
+   });
+   fragment.append(button);
+  }
+  container.replaceChildren(fragment);
+ }
+ function rememberRecent(game){
+  recent=addRecent(recent,game);
+  try{saveRecent(window.localStorage,recent)}catch{}
+  renderRecent();
+ }
  function renderChoices(preferredId=''){
   const matches=filterGames(games,environment,$('search').value,kind);
   const shown=favoritesOnly?favoriteGames(matches,favorites):matches;
@@ -139,12 +170,12 @@ function initDocument(){
   $('count').textContent='Exibindo '+limited.length+' de '+shown.length+' títulos encontrados'+(shown.length>80?'. Digite para filtrar os demais.':'.');
   setSelected(next);
  }
- function setEnvironment(next){
+ function setEnvironment(next,preferredId='',forceReset=false){
   if(next!=='arcade'&&next!=='estrategia')return;
   const changed=environment!==next;environment=next;
-  if(changed){favoritesOnly=false;$('favorites-only').checked=false;}
+  if(changed||forceReset){favoritesOnly=false;$('favorites-only').checked=false;}
   document.querySelectorAll('[data-environment]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.environment===environment)));
-  $('search').value='';kind='all';$('game-kind').value='all';selected=null;renderChoices(changed?'':requestedId);
+  $('search').value='';kind='all';$('game-kind').value='all';selected=null;renderChoices(preferredId||(changed?'':requestedId));
   if(changed)addMessage('Catálogo alterado para PG '+(environment==='arcade'?'Arcade':'Estratégia')+'. Selecione o título desejado para receber orientações próprias.');
  }
  function submitQuestion(text){
@@ -152,6 +183,7 @@ function initDocument(){
   if(!q||q.length>240)return;
   addMessage(q,'user');
   const reply=answerQuestion(q,selected);
+  if(selected)rememberRecent(selected);
   addMessage(reply.answer,'bot');
   $('question').value='';
   $('question').focus({preventScroll:true});
@@ -181,6 +213,7 @@ function initDocument(){
   if(!next){$('action-status').textContent='Nenhum título disponível com esses filtros.';return;}
   $('search').value=next.name;
   renderChoices(next.id);
+  if(selected)rememberRecent(selected);
   $('action-status').textContent='Sugestão selecionada: '+next.name+'. Abra a partida ou peça uma dica.';
  });
  $('plan-game').addEventListener('click',()=>{
@@ -190,6 +223,7 @@ function initDocument(){
    return;
   }
   $('action-status').textContent='Plano de partida montado com as instruções do catálogo.';
+  rememberRecent(selected);
   addMessage('Plano para '+selected.name+':\n'+plan.steps.join('\n'),'bot');
  });
  $('share-game').addEventListener('click',async()=>{
@@ -203,12 +237,24 @@ function initDocument(){
    $('action-status').textContent='Não foi possível copiar automaticamente. Use o endereço desta página para copiar manualmente.';
   }
  });
+ $('clear-recent').addEventListener('click',()=>{
+  recent=[];
+  let saved=false;
+  try{saved=saveRecent(window.localStorage,recent)}catch{}
+  renderRecent();
+  $('action-status').textContent=saved?'Consultas recentes apagadas deste navegador.':'Lista limpa nesta visita; o navegador pode impedir o salvamento.';
+ });
+ $('link').addEventListener('click',()=>{if(selected)rememberRecent(selected);});
  $('clear-chat').addEventListener('click',()=>{
   $('log').replaceChildren();
   addMessage('Conversa limpa. Selecione um jogo e faça uma nova pergunta.');
   $('action-status').textContent='Conversa limpa. Nenhuma pergunta foi salva.';
  });
- $('select').addEventListener('change',()=>setSelected(games.find(g=>g.environment===environment&&g.id===$('select').value)));
+ $('select').addEventListener('change',()=>{
+  const game=games.find(g=>g.environment===environment&&g.id===$('select').value);
+  setSelected(game);
+  if(game)rememberRecent(game);
+ });
  $('form').addEventListener('submit',e=>{e.preventDefault();submitQuestion($('question').value)});
  document.querySelectorAll('[data-question]').forEach(button=>button.addEventListener('click',()=>submitQuestion(button.dataset.question)));
  document.querySelectorAll('[data-environment]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.environment===environment)));
@@ -219,12 +265,17 @@ function initDocument(){
   if(!data||!Array.isArray(data.games)||data.games.length<300)throw Error('Dados do catálogo incompletos');
   games=data.games;
   try{favorites=loadFavoriteKeys(window.localStorage,games)}catch{favorites=new Set()}
+  try{recent=loadRecent(window.localStorage,games)}catch{recent=[]}
   $('arcade-count').textContent=String(data.counts.arcade);
   $('mission-count').textContent=String(data.counts.missions);
   $('original-count').textContent=String(data.counts.classic+data.counts.independent);
   renderChoices(requestedId||'snake');
+  if(requestedId&&selected?.id===requestedId)rememberRecent(selected);
+  else renderRecent();
  }).catch(()=>{
   $('select').replaceChildren();
+  $('clear-recent').disabled=true;
+  $('recent-games').textContent='Histórico indisponível sem catálogo.';
   $('count').textContent='Não foi possível abrir o catálogo. Reconecte e recarregue esta página.';
   addMessage('O catálogo não está acessível nesta visita. Você pode usar os links de navegação para abrir o PG Arcade ou o PG Estratégia.');
  });
