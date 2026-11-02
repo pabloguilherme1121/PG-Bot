@@ -5,6 +5,23 @@ export function filterGames(games,environment,search=''){
  const q=normalize(search).slice(0,80);
  return games.filter(g=>g.environment===environment&&(!q||normalize(g.name+' '+g.category+' '+g.id).includes(q)));
 }
+/** Cria links sem mensagens ou dados privados; nunca aceita destino arbitrário. */
+export function makeShareUrl(environment,id){
+ if(!['arcade','estrategia'].includes(environment)||typeof id!=='string'||!/^[a-z0-9][a-z0-9-]{0,63}$/.test(id))return null;
+ const url=new URL('https://pabloguilherme1121.github.io/PG-Bot/');
+ url.searchParams.set('projeto',environment);
+ url.searchParams.set('jogo',id);
+ return url.href;
+}
+/** Escolhe outro item real no filtro atual, sem repetição da seleção. */
+export function nextGameChoice(games,environment,currentId='',search=''){
+ if(!Array.isArray(games)||!['arcade','estrategia'].includes(environment))return null;
+ const items=filterGames(games,environment,search);
+ if(items.length<2)return null;
+ const index=items.findIndex(item=>item.id===currentId);
+ const next=items[(index+1)%items.length];
+ return next.id===currentId?null:next;
+}
 export function answerQuestion(question,game){
  const q=bounded(question);
  const fallback='Posso explicar o objetivo, os controles, dar uma dica, falar de reinício, modo offline, acessibilidade e recordes. Escolha um assunto ou tente outra pergunta.';
@@ -48,6 +65,9 @@ function initDocument(){
  }
  function setSelected(game){
   selected=game??null;
+  $('share-status').textContent='';
+  $('share-url').hidden=true;
+  $('share-url').value='';
   $('name').textContent=selected?.name||'Nenhum jogo encontrado';
   $('description').textContent=selected?.description||'Digite outro termo para buscar um jogo.';
   const destination=selected?.url||'https://pabloguilherme1121.github.io/PG-Arcade/';
@@ -62,7 +82,13 @@ function initDocument(){
  }
  function renderChoices(preferredId=''){
   const shown=filterGames(games,environment,$('search').value);
+  // Deep links de jogos fora dos 80 primeiros precisam continuar selecionáveis.
+  const pinned=shown.find(g=>g.id===preferredId)||shown.find(g=>g.id===selected?.id);
   const limited=shown.slice(0,80);
+  if(pinned&&!limited.some(g=>g.id===pinned.id)){
+   limited.splice(79,1);
+   limited.unshift(pinned);
+  }
   const options=document.createDocumentFragment();
   for(const game of limited){
    const option=document.createElement('option');
@@ -74,6 +100,33 @@ function initDocument(){
   if(next)$('select').value=next.id;
   $('count').textContent='Exibindo '+limited.length+' de '+shown.length+' títulos encontrados'+(shown.length>80?'. Digite para filtrar os demais.':'.');
   setSelected(next);
+ }
+ function chooseAnotherGame(){
+  const next=nextGameChoice(games,environment,selected?.id||'',$('search').value);
+  if(!next){$('share-status').textContent='Não há outro jogo neste filtro. Amplie a busca para descobrir mais opções.';return;}
+  // Inclui a sugestão nas 80 opções exibidas antes de selecioná-la.
+  renderChoices(next.id);
+  $('share-status').textContent='Próxima sugestão: '+next.name+'.';
+ }
+ async function shareContext(){
+  const url=selected?makeShareUrl(environment,selected.id):null;
+  if(!url){$('share-status').textContent='Selecione um jogo real antes de compartilhar.';return;}
+  try{
+   await navigator.clipboard.writeText(url);
+   $('share-status').textContent='Link contextual copiado. Você pode enviar para outra pessoa.';
+  }catch{
+   $('share-url').hidden=false;
+   $('share-url').value=url;
+   $('share-url').focus({preventScroll:true});
+   $('share-url').select();
+   $('share-status').textContent='Selecione e copie o link abaixo. O navegador não autorizou copiar automaticamente.';
+  }
+ }
+ function clearConversation(){
+  $('log').replaceChildren();
+  addMessage('Conversa limpa. O jogo selecionado continua disponível para outras perguntas.');
+  $('question').value='';
+  $('question').focus({preventScroll:true});
  }
  function setEnvironment(next){
   if(next!=='arcade'&&next!=='estrategia')return;
@@ -95,6 +148,16 @@ function initDocument(){
  $('search').addEventListener('input',()=>renderChoices());
  $('select').addEventListener('change',()=>setSelected(games.find(g=>g.environment===environment&&g.id===$('select').value)));
  $('form').addEventListener('submit',e=>{e.preventDefault();submitQuestion($('question').value)});
+ $('surprise-game').addEventListener('click',chooseAnotherGame);
+ $('copy-context').addEventListener('click',shareContext);
+ $('clear-chat').addEventListener('click',clearConversation);
+ document.addEventListener('keydown',event=>{
+  if(event.altKey&&event.shiftKey&&!event.ctrlKey&&!event.metaKey&&event.key.toLowerCase()==='h'){
+   event.preventDefault();
+   $('question').focus({preventScroll:true});
+   $('question').scrollIntoView({block:'nearest',behavior:'instant'});
+  }
+ });
  document.querySelectorAll('[data-question]').forEach(button=>button.addEventListener('click',()=>submitQuestion(button.dataset.question)));
  document.querySelectorAll('[data-environment]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.environment===environment)));
  fetch('./data/games.json').then(response=>{

@@ -50,7 +50,17 @@ npm run test:e2e
 
 `data/games.json` é um snapshot extraído do código original dos jogos em 1º de novembro de 2026, não um feed em tempo real. Quando um jogo é adicionado, removido ou renomeado no Arcade ou Estratégia, o catálogo do PG Bot precisa ser revalidado e atualizado junto aos testes. Mantenha os IDs e URLs reais, sem inventar títulos ou funcionalidades.
 
-O site estático é publicado via branch `gh-pages`. Antes de publicar uma nova versão, executar os testes e atualizar o snapshot de acordo com o estado real dos dois projetos.
+O GitHub Pages está configurado para publicar pela branch `main`. Antes de integrar uma nova versão, executar os testes e atualizar o snapshot de acordo com os dois projetos. O modelo de workflow em `docs/` ainda depende da permissão `workflow` do GitHub para ser ativado.
+
+## Melhorias de descoberta e navegação
+
+- **Descobrir outro jogo** escolhe o próximo título real dentro do ambiente e do filtro atuais. Quando existe um único resultado, não inventa outra opção.
+- **Compartilhar contexto** gera um link do próprio PG Bot com o ambiente e o ID selecionados. O navegador tenta copiar o endereço; caso bloqueie o acesso à área de transferência, exibe um campo para cópia manual. Nenhuma mensagem da conversa faz parte do link.
+- **Limpar conversa** descarta imediatamente as mensagens mostradas, sem alterar a seleção do jogo.
+- **Alt + Shift + H** direciona o foco ao campo de pergunta. Os atalhos não executam ações dentro de outros sites.
+- Links profundos de jogos localizados fora dos primeiros 80 resultados continuam selecionáveis sem carregar uma lista extensa.
+
+Esses recursos são locais e não exigem contas, sincronização ou chamadas externas de chat.
 
 ## Licença
 
