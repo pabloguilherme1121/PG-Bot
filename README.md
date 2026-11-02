@@ -18,6 +18,8 @@ O site é um PWA: depois de uma visita conectada e de armazenar os recursos no n
 ## Novas ferramentas
 
 - Filtro por tipo: escolha entre missões e jogos originais no PG Estratégia. O PG Arcade continua com seu catálogo de jogos.
+- Busca contextual: encontre jogos também pelas regras, objetivos, orientações e dificuldade; nomes e IDs recebem prioridade nos resultados.
+- Guia rápido: reúne objetivo, dificuldade quando disponível, regras, controles e dicas presentes no catálogo para o jogo selecionado, sem inventar dados da partida.
 - Sugestão de partida: escolhe um título real dentro da busca e dos filtros ativos, sem inventar rankings.
 - Link de ajuda: permite compartilhar uma URL com `projeto` e `jogo` validados, sem incluir perguntas ou histórico de conversa. Se o navegador bloquear a cópia, o endereço atual pode ser copiado manualmente.
 - Limpar conversa: apaga as mensagens exibidas nesta aba. Perguntas continuam sem armazenamento permanente ou envio a servidores.

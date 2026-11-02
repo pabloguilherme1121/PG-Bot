@@ -3,8 +3,31 @@ export const normalize = text => String(text ?? '').normalize('NFD').replace(/[\
 const bounded=text=>typeof text==='string'&&text.length<=240?normalize(text):'';
 export function filterGames(games,environment,search='',kind='all'){
  const terms=normalize(search).slice(0,80).split(/\s+/).filter(Boolean);
- if(!['all','mission','game'].includes(kind))return [];
- return games.filter(g=>g.environment===environment&&(kind==='all'||g.kind===kind)&&terms.every(term=>normalize(g.name+' '+g.category+' '+g.id).includes(term)));
+ if(!Array.isArray(games)||!['arcade','estrategia'].includes(environment)||!['all','mission','game'].includes(kind))return [];
+ const results=[];
+ for(const game of games){
+  if(game.environment!==environment||(kind!=='all'&&game.kind!==kind))continue;
+  const title=normalize(game.name+' '+game.id);
+  const category=normalize(game.category+' '+(game.difficulty||''));
+  const details=normalize((game.description||'')+' '+(game.help||'')+' '+(game.hint||''));
+  if(!terms.every(term=>title.includes(term)||category.includes(term)||details.includes(term)))continue;
+  const score=terms.reduce((total,term)=>total+(title.includes(term)?5:category.includes(term)?3:1),0);
+  results.push({game,score});
+ }
+ if(terms.length)results.sort((a,b)=>b.score-a.score);
+ return results.map(result=>result.game);
+}
+export function buildGameGuide(game){
+ if(!game||!['arcade','estrategia'].includes(game.environment)||typeof game.name!=='string'||!game.name.trim())return null;
+ const description=typeof game.description==='string'?game.description.trim():'';
+ const help=typeof game.help==='string'?game.help.trim():'';
+ const hint=typeof game.hint==='string'?game.hint.trim():'';
+ const lines=['Guia rápido: '+game.name.trim(), 'Objetivo: '+(description||'Consulte o objetivo exibido dentro da partida.')];
+ if(game.kind==='mission'&&typeof game.difficulty==='string'&&game.difficulty.trim())lines.push('Dificuldade: '+game.difficulty.trim());
+ if(help)lines.push('Regras e controles: '+help);
+ if(hint&&hint!==help)lines.push('Dica do jogo: '+hint);
+ lines.push('Esta página não acompanha o turno, o placar nem o andamento da sua partida em tempo real.');
+ return lines.join('\n\n');
 }
 export function contextUrl(game){
  if(!game||!['arcade','estrategia'].includes(game.environment)||typeof game.id!=='string'||!/^[a-z0-9][a-z0-9-]{0,63}$/.test(game.id))return null;
@@ -33,6 +56,8 @@ export function answerQuestion(question,game){
   return {topic:'acessibilidade',answer:'Use Tab para avançar pelos controles e Enter ou Espaço para ativar botões. O PG Arcade também oferece atalhos Alt + Shift + B para tabuleiro, H para ajuda e R para reiniciar. O suporte varia por jogo; consulte as orientações na partida.'};
  if(/reinic|recomec|paus|retom|continuar|reset|desfaz/.test(q))
   return {topic:'reiniciar',answer:'Abra o jogo e use Pausar, Continuar, Reiniciar ou Desfazer quando esses comandos estiverem disponíveis. Reiniciar pode encerrar a partida atual; confirme na interface antes de continuar.'};
+ if(/guia rapido|guia da partida|resumo da partida|preparar partida/.test(q))
+  return {topic:'guia',answer:buildGameGuide(game)||fallback};
  if(/controle|tecla|botao|seta|mover|tocar|touch|comando|arrast/.test(q))
   return {topic:'controles',answer:'Controles de '+game.name+': '+(game.help||game.description||'Consulte os comandos exibidos na própria partida.')};
  if(/estrateg|dica|como venc|como ganh|ganhar|melhor jogad|proxima jogad|proximo passo|ajuda/.test(q))

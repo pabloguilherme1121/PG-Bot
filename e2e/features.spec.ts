@@ -51,3 +51,21 @@ test('permissão de copiar negada orienta usuário sem perder o link',async({pa
  await expect(page.locator('#action-status')).toContainText('copiar manualmente');
  await expect(page).toHaveURL(/projeto=arcade&jogo=snake/);
 });
+
+test('guia contextual e busca por regras funcionam em tela estreita',async({page})=>{
+ await page.setViewportSize({width:320,height:780});
+ const errors:string[]=[];
+ page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('./?projeto=estrategia&jogo=est-001');
+ await expect(page.locator('#game-name')).toContainText('Conquista territorial');
+ await page.getByRole('button',{name:'Guia rápido'}).click();
+ await expect(page.locator('#chat-log .bot .bubble').last()).toContainText('Iniciante');
+ await expect(page.locator('#chat-log .bot .bubble').last()).toContainText('Domine a meta');
+ await page.locator('#game-search').fill('iniciante');
+ await expect(page.locator('#game-select option[value="est-001"]')).toHaveCount(1);
+ await page.getByRole('button',{name:'PG Arcade'}).click();
+ await page.locator('#game-search').fill('cronometro');
+ await expect(page.locator('#game-select option[value="lanternas"]')).toHaveCount(1);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ expect(errors).toEqual([]);
+});
