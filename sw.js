@@ -1,7 +1,7 @@
 // Serviço exclusivo do PG Bot. Nunca intercepta o Arcade nem o Estratégia.
-const CACHE='pg-bot-shell-v2';
+const CACHE='pg-bot-shell-v3';
 const SCOPE=new URL('./',self.registration.scope);
-const FILES=['./','./index.html','./styles.css','./app.mjs','./icon.svg','./manifest.webmanifest','./data/games.json','./brand/pg-bot/mascot.webp'];
+const FILES=['./','./index.html','./styles.css','./app.mjs','./favorites.mjs','./icon.svg','./manifest.webmanifest','./data/games.json','./brand/pg-bot/mascot.webp'];
 const ALLOWED=new Set(FILES.map(file=>new URL(file,SCOPE).pathname));
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('pg-bot-shell-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
