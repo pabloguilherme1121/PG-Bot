@@ -109,6 +109,7 @@ function initDocument(){
   const u=new URL(destination);
   if(u.hostname==='pabloguilherme1121.github.io'&&(u.pathname.startsWith('/PG-Arcade/')||u.pathname.startsWith('/PG-Estrategia/'))) $('link').href=u.href;
   $('link').hidden=!selected;
+  $('share-game').disabled=!selected;
   const isFavorite=!!selected&&favorites.has(favoriteKey(selected));
   $('favorite-game').disabled=!selected;
   $('favorite-game').setAttribute('aria-pressed',String(isFavorite));
@@ -174,7 +175,8 @@ function initDocument(){
   $('action-status').textContent=(wasFavorite?'Removido dos favoritos.':'Adicionado aos favoritos.')+(persisted?' Preferência salva neste navegador.':' O navegador não permitiu salvar; favorito disponível somente nesta visita.');
  });
  $('random-game').addEventListener('click',()=>{
-  const pool=filterGames(games,environment,$('search').value,kind);
+  const matches=filterGames(games,environment,$('search').value,kind);
+  const pool=favoritesOnly?favoriteGames(matches,favorites):matches;
   const next=suggestGame(pool);
   if(!next){$('action-status').textContent='Nenhum título disponível com esses filtros.';return;}
   $('search').value=next.name;

@@ -25,7 +25,7 @@ O site é um PWA: depois de uma visita conectada e de armazenar os recursos no n
 - Limpar conversa: apaga as mensagens exibidas nesta aba. Perguntas continuam sem armazenamento permanente ou envio a servidores.
 - Plano de 3 passos: reúne objetivo, controles e dica do título selecionado, usando somente o catálogo local. O painel de mensagens pode receber foco no teclado para ler orientações longas.
 - Links diretos para qualquer ID do catálogo, mesmo fora dos primeiros 80 resultados exibidos.
-- Cache PWA v2: invalida somente versões antigas do próprio PG Bot, preservando o cache separado dos jogos.
+- Cache PWA v3: invalida somente versões antigas do próprio PG Bot, preservando o cache separado dos jogos.
 
 ## Favoritos locais
 
@@ -69,7 +69,7 @@ npm run test:e2e
 
 `data/games.json` é um snapshot extraído do código original dos jogos em 1º de novembro de 2026, não um feed em tempo real. Quando um jogo é adicionado, removido ou renomeado no Arcade ou Estratégia, o catálogo do PG Bot precisa ser revalidado e atualizado junto aos testes. Mantenha os IDs e URLs reais, sem inventar títulos ou funcionalidades.
 
-O site estático é publicado via branch `gh-pages`. Antes de publicar uma nova versão, executar os testes e atualizar o snapshot de acordo com o estado real dos dois projetos.
+O site estático é publicado pelo GitHub Pages a partir da branch `main` (raiz `/`). Antes de publicar uma nova versão, executar os testes e atualizar o snapshot de acordo com o estado real dos dois projetos.
 
 ## Licença
 
