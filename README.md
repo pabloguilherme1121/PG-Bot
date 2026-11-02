@@ -81,6 +81,8 @@ No GitHub Actions, o job **Comparar catálogo com Arcade e Estratégia** executa
 
 ## Sincronização assistida das fontes
 
+Quando um jogo independente publica um manifesto `game.meta.json`, o extrator verifica ID, título, motor, objetivo, instruções de toque e teclado, versão e exatamente três orientações estratégicas. Campos vazios, HTML e IDs divergentes bloqueiam a importação. O manifesto passa a ser a fonte principal de nome, objetivo e instruções daquele jogo; o texto editorial do PG Bot continua protegido pela revisão de diferenças.
+
 O job [Propor sincronização do catálogo PG Bot](./.github/workflows/catalog-sync.yml) verifica diariamente o PG Arcade e o PG Estratégia. O script `scripts/sync-catalog.mjs` extrai metadados declarativos (nome, descrição e instruções explícitas), mantendo uma linha de base em `data/source-metadata.json`.
 
 Uma mudança na fonte **só atualiza automaticamente um campo do candidato quando o campo do PG Bot ainda coincide com o texto da fonte anterior**. Se o PG Bot tiver uma descrição ou ajuda personalizada, o texto é mantido e aparece como pendência em `docs/catalog-sync-review.md`. Novos jogos são sinalizados sem serem inventados nem incluídos automaticamente. Toda alteração é proposta em **pull request em rascunho**: nenhuma mesclagem ou publicação acontece sem revisão.
