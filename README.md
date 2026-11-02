@@ -21,6 +21,9 @@ O site é um PWA: depois de uma visita conectada e de armazenar os recursos no n
 - Sugestão de partida: escolhe um título real dentro da busca e dos filtros ativos, sem inventar rankings.
 - Link de ajuda: permite compartilhar uma URL com `projeto` e `jogo` validados, sem incluir perguntas ou histórico de conversa. Se o navegador bloquear a cópia, o endereço atual pode ser copiado manualmente.
 - Limpar conversa: apaga as mensagens exibidas nesta aba. Perguntas continuam sem armazenamento permanente ou envio a servidores.
+- Atalho **Alt + Shift + H**: foca a caixa de perguntas do PG Bot sem afetar os atalhos dos jogos nos outros sites.
+- Falha na permissão de copiar: exibe o endereço completo em um campo selecionável, sem obrigar a copiar manualmente da barra do navegador.
+- Sugestões consecutivas: preservam a busca digitada e, havendo alternativas, não repetem o jogo já selecionado.
 - Links diretos para qualquer ID do catálogo, mesmo fora dos primeiros 80 resultados exibidos.
 - Cache PWA v2: invalida somente versões antigas do próprio PG Bot, preservando o cache separado dos jogos.
 
@@ -59,7 +62,7 @@ npm run test:e2e
 
 `data/games.json` é um snapshot extraído do código original dos jogos em 1º de novembro de 2026, não um feed em tempo real. Quando um jogo é adicionado, removido ou renomeado no Arcade ou Estratégia, o catálogo do PG Bot precisa ser revalidado e atualizado junto aos testes. Mantenha os IDs e URLs reais, sem inventar títulos ou funcionalidades.
 
-O site estático é publicado via branch `gh-pages`. Antes de publicar uma nova versão, executar os testes e atualizar o snapshot de acordo com o estado real dos dois projetos.
+O GitHub Pages usa a branch `main`. Antes de publicar uma nova versão, executar os testes e atualizar o snapshot de acordo com o estado real dos dois projetos. O modelo de CI em `docs/` requer permissão `workflow` para ativação.
 
 ## Licença
 

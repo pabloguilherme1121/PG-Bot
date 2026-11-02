@@ -13,11 +13,11 @@ export function contextUrl(game){
  url.searchParams.set('jogo',game.id);
  return url.href;
 }
-export function suggestGame(games,random=Math.random){
+export function suggestGame(games,random=Math.random,currentId=''){
  if(!Array.isArray(games)||games.length===0)return null;
  const n=Number(random());
  const idx=Number.isFinite(n)?Math.min(games.length-1,Math.max(0,Math.floor(n*games.length))):0;
- return games[idx];
+ return games.length>1&&games[idx]?.id===currentId?games[(idx+1)%games.length]:games[idx];
 }
 export function answerQuestion(question,game){
  const q=bounded(question);
@@ -62,6 +62,8 @@ function initDocument(){
  }
  function setSelected(game){
   selected=game??null;
+  $('share-url').hidden=true;
+  $('share-url').value='';
   $('name').textContent=selected?.name||'Nenhum jogo encontrado';
   $('description').textContent=selected?.description||'Digite outro termo para buscar um jogo.';
   const destination=selected?.url||'https://pabloguilherme1121.github.io/PG-Arcade/';
@@ -113,9 +115,9 @@ function initDocument(){
  $('game-kind').addEventListener('change',()=>{kind=$('game-kind').value;renderChoices();});
  $('random-game').addEventListener('click',()=>{
   const pool=filterGames(games,environment,$('search').value,kind);
-  const next=suggestGame(pool);
+  const next=suggestGame(pool,Math.random,selected?.id||'');
   if(!next){$('action-status').textContent='Nenhum título disponível com esses filtros.';return;}
-  $('search').value=next.name;
+  // Preserva o filtro original para permitir novas sugestões.
   renderChoices(next.id);
   $('action-status').textContent='Sugestão selecionada: '+next.name+'. Abra a partida ou peça uma dica.';
  });
@@ -127,7 +129,18 @@ function initDocument(){
    await navigator.clipboard.writeText(link);
    $('action-status').textContent='Link de ajuda copiado para a área de transferência.';
   }catch{
-   $('action-status').textContent='Não foi possível copiar automaticamente. Use o endereço desta página para copiar manualmente.';
+   $('share-url').value=link;
+    $('share-url').hidden=false;
+    $('share-url').focus({preventScroll:true});
+    $('share-url').select();
+    $('action-status').textContent='Não foi possível copiar automaticamente. Para copiar manualmente, selecione o link no campo abaixo.';
+  }
+ });
+ document.addEventListener('keydown',event=>{
+  if(event.altKey&&event.shiftKey&&!event.ctrlKey&&!event.metaKey&&event.key.toLowerCase()==='h'){
+   event.preventDefault();
+   $('question').focus({preventScroll:true});
+   $('question').scrollIntoView({block:'nearest',behavior:'instant'});
   }
  });
  $('clear-chat').addEventListener('click',()=>{
