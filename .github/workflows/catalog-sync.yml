@@ -1,0 +1,65 @@
+name: Propor sincronizacao do catalogo PG Bot
+on:
+  schedule:
+    - cron: '17 10 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pg-bot-catalog-proposal
+  cancel-in-progress: false
+
+jobs:
+  propose:
+    name: Gerar proposta revisavel
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: pabloguilherme1121/PG-Arcade
+          path: _sources/PG-Arcade
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          repository: pabloguilherme1121/PG-Estrategia
+          path: _sources/PG-Estrategia
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Gerar metadados e registrar conflitos
+        run: node scripts/sync-catalog.mjs --arcade-root=_sources/PG-Arcade --strategy-root=_sources/PG-Estrategia --write
+      - name: Testar proposta antes de enviar
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Abrir PR em rascunho sem publicacao automatica
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- data/games.json data/source-metadata.json docs/catalog-sync-review.md)" ]; then
+            echo "Sem mudancas nas fontes oficiais."
+            exit 0
+          fi
+          existing="$(gh pr list --state open --json headRefName --jq '[.[] | select(.headRefName | startswith("automation/catalog-sync-"))] | length')"
+          if [ "$existing" != "0" ]; then
+            echo "::notice::Uma proposta de sincronizacao ja esta aberta. Nao sobrescrever alteracoes em revisao."
+            exit 0
+          fi
+          branch="automation/catalog-sync-${GITHUB_RUN_ID}"
+          git switch -c "$branch"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/games.json data/source-metadata.json docs/catalog-sync-review.md
+          git commit -m "chore(pg-bot): proposta de sincronizacao do catalogo"
+          git push origin "$branch"
+          gh pr create --draft --base main --head "$branch" --title "chore(pg-bot): revisar metadados atualizados nas fontes" --body "Proposta automatica a partir dos repositorios oficiais PG-Arcade e PG-Estrategia. Compare os campos alterados e revise docs/catalog-sync-review.md. Textos editoriais, novos IDs e conflitos exigem aprovacao humana. Nenhuma alteracao sera mesclada ou publicada automaticamente."
