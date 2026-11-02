@@ -9,7 +9,7 @@ Site independente do PG Bot, conectado por **links diretos** ao PG Arcade e ao P
 
 ## O que faz
 
-O PG Bot responde perguntas em português sobre objetivos, controles, dicas, acessibilidade, recordes, reinício e modo offline de **150 jogos reais do Arcade, 150 missões do Estratégia e 36 jogos independentes**. Permite buscar por nome, escolher um título e abrir a partida certa.
+O PG Bot responde perguntas em português sobre objetivos, controles, dicas, acessibilidade, recordes, reinício e modo offline de **150 jogos reais do Arcade, 150 missões do Estratégia e 38 jogos independentes**. Permite buscar por nome, escolher um título e abrir a partida certa.
 
 **Não é um modelo de IA conectado.** O código usa regras locais e um catálogo JSON de instruções retiradas dos projetos. As perguntas não são enviadas a uma API nem gravadas em um servidor. O site não vê a partida em tempo real: para consultar turno e placar, o usuário abre o PG Bot dentro do jogo correspondente.
 
@@ -69,7 +69,7 @@ npm run test:e2e
 
 ## Auditoria dos catálogos e links
 
-O build verifica os 336 registros, contagens, tipos, IDs repetidos e destinos HTTPS. Uma comparação adicional com os repositórios de origem confirma se os IDs do PG Arcade, das 150 missões, dos nove clássicos e dos 27 jogos independentes continuam correspondentes.
+O build verifica os 338 registros, contagens, tipos, IDs repetidos e destinos HTTPS. Uma comparação adicional com os repositórios de origem confirma se os IDs do PG Arcade, das 150 missões, dos nove clássicos e dos 29 jogos independentes continuam correspondentes.
 
 Com checkouts locais ao lado do PG Bot:
 
