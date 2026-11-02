@@ -65,6 +65,18 @@ npx playwright install chromium firefox webkit
 npm run test:e2e
 ```
 
+## Auditoria dos catálogos e links
+
+O build verifica os 336 registros, contagens, tipos, IDs repetidos e destinos HTTPS. Uma comparação adicional com os repositórios de origem confirma se os IDs do PG Arcade, das 150 missões, dos nove clássicos e dos 27 jogos independentes continuam correspondentes.
+
+Com checkouts locais ao lado do PG Bot:
+
+```bash
+node scripts/audit-catalog.mjs --arcade-root=../PG-Arcade --strategy-root=../PG-Estrategia
+```
+
+No GitHub Actions, o job **Comparar catálogo com Arcade e Estratégia** executa essa verificação em PRs, commits na main e semanalmente. Ele falha se houver divergência, sem modificar ou publicar os projetos. A auditoria confere IDs e URLs, mas não garante que todas as descrições e regras continuem idênticas às fontes. Esse conteúdo exige revisão quando um jogo mudar.
+
 ## Manutenção dos dados
 
 `data/games.json` é um snapshot extraído do código original dos jogos em 1º de novembro de 2026, não um feed em tempo real. Quando um jogo é adicionado, removido ou renomeado no Arcade ou Estratégia, o catálogo do PG Bot precisa ser revalidado e atualizado junto aos testes. Mantenha os IDs e URLs reais, sem inventar títulos ou funcionalidades.

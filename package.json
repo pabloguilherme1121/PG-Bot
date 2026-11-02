@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/serve.mjs",
-    "build": "node scripts/validate-site.mjs",
-    "test": "node --test tests/assistant.test.mjs tests/site.test.mjs tests/features.test.mjs tests/favorites.test.mjs tests/plan.test.mjs",
+    "build": "node scripts/validate-site.mjs && node scripts/audit-catalog.mjs",
+    "test": "node --test tests/assistant.test.mjs tests/site.test.mjs tests/features.test.mjs tests/favorites.test.mjs tests/plan.test.mjs tests/catalog-audit.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ci": "playwright test"
   },
