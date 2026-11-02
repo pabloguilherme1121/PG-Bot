@@ -15,6 +15,15 @@ O PG Bot responde perguntas em português sobre objetivos, controles, dicas, ace
 
 O site é um PWA: depois de uma visita conectada e de armazenar os recursos no navegador, o assistente pode funcionar offline. Os próprios jogos têm políticas de cache separadas; a primeira visita sem internet pode falhar.
 
+## Novas ferramentas
+
+- Filtro por tipo: escolha entre missões e jogos originais no PG Estratégia. O PG Arcade continua com seu catálogo de jogos.
+- Sugestão de partida: escolhe um título real dentro da busca e dos filtros ativos, sem inventar rankings.
+- Link de ajuda: permite compartilhar uma URL com `projeto` e `jogo` validados, sem incluir perguntas ou histórico de conversa. Se o navegador bloquear a cópia, o endereço atual pode ser copiado manualmente.
+- Limpar conversa: apaga as mensagens exibidas nesta aba. Perguntas continuam sem armazenamento permanente ou envio a servidores.
+- Links diretos para qualquer ID do catálogo, mesmo fora dos primeiros 80 resultados exibidos.
+- Cache PWA v2: invalida somente versões antigas do próprio PG Bot, preservando o cache separado dos jogos.
+
 ## Organização
 
 - `index.html`: navegação, seleção dos catálogos e chat acessível.
