@@ -50,6 +50,8 @@
     <label class="field-label" for="game-select">Selecione no catálogo</label>
     <select id="game-select" aria-describedby="game-count" size="6"><option>Carregando catálogo...</option></select>
     <p id="game-count" class="helper-text" role="status">Lendo títulos disponíveis.</p>
+    <div class="favorite-tools"><label for="favorites-only"><input type="checkbox" id="favorites-only"> Mostrar só favoritos</label><button id="favorite-game" type="button" aria-pressed="false" disabled>Adicionar aos favoritos</button></div>
+    <p class="favorite-note">Favoritos ficam somente neste navegador. Suas perguntas não são salvas.</p>
     <div class="game-actions"><button id="random-game" type="button">Sugerir partida</button><button id="share-game" type="button">Copiar link de ajuda</button></div>
     <p id="action-status" class="action-status" role="status" aria-live="polite"></p>
     <div class="chosen-game"><span class="chosen-tag">JOGO SELECIONADO</span><strong id="game-name">Escolha uma partida</strong><p id="game-description">As orientações aparecem após selecionar um jogo.</p><a id="game-link" href="https://pabloguilherme1121.github.io/PG-Arcade/" target="_blank" rel="noopener noreferrer">Abrir partida <span aria-hidden="true">↗</span></a></div>
