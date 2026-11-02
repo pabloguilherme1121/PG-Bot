@@ -156,7 +156,11 @@ export function proposeCatalogChanges(catalog,previous,current){
   const now=current[key];
   if(!now){review.push({key,reason:'fonte ausente'});continue}
   for(const field of FIELDS){
-   if(!Object.hasOwn(now,field))continue;
+   if(!Object.hasOwn(now,field)){
+    // Não apaga instruções: sinaliza quando um campo antes documentado some da fonte.
+    if(before&&Object.hasOwn(before,field))review.push({key,field,reason:'campo removido da fonte'});
+    continue;
+   }
    if(!safeField(field,now[field])){
     review.push({key,field,reason:'texto inseguro'});continue
    }
