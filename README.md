@@ -79,6 +79,21 @@ node scripts/audit-catalog.mjs --arcade-root=../PG-Arcade --strategy-root=../PG-
 
 No GitHub Actions, o job **Comparar catálogo com Arcade e Estratégia** executa essa verificação em PRs, commits na main e semanalmente. Ele falha se houver divergência, sem modificar ou publicar os projetos. A auditoria confere IDs e URLs, mas não garante que todas as descrições e regras continuem idênticas às fontes. Esse conteúdo exige revisão quando um jogo mudar.
 
+## Sincronização assistida das fontes
+
+O job [Propor sincronização do catálogo PG Bot](./.github/workflows/catalog-sync.yml) verifica diariamente o PG Arcade e o PG Estratégia. O script `scripts/sync-catalog.mjs` extrai metadados declarativos (nome, descrição e instruções explícitas), mantendo uma linha de base em `data/source-metadata.json`.
+
+Uma mudança na fonte **só atualiza automaticamente um campo do candidato quando o campo do PG Bot ainda coincide com o texto da fonte anterior**. Se o PG Bot tiver uma descrição ou ajuda personalizada, o texto é mantido e aparece como pendência em `docs/catalog-sync-review.md`. Novos jogos são sinalizados sem serem inventados nem incluídos automaticamente. Toda alteração é proposta em **pull request em rascunho**: nenhuma mesclagem ou publicação acontece sem revisão.
+
+Executar manualmente com cópias dos dois projetos:
+
+```bash
+node scripts/sync-catalog.mjs --arcade-root=../PG-Arcade --strategy-root=../PG-Estrategia
+node scripts/sync-catalog.mjs --arcade-root=../PG-Arcade --strategy-root=../PG-Estrategia --write
+```
+
+A criação automática de PRs pelo `GITHUB_TOKEN` depende de a configuração do repositório permitir essa ação. Se a automação falhar por permissão, habilite em Settings → Actions → General a criação de pull requests pelo GitHub Actions; não use tokens pessoais no código.
+
 ## Manutenção dos dados
 
 `data/games.json` é um snapshot extraído do código original dos jogos em 1º de novembro de 2026, não um feed em tempo real. Quando um jogo é adicionado, removido ou renomeado no Arcade ou Estratégia, o catálogo do PG Bot precisa ser revalidado e atualizado junto aos testes. Mantenha os IDs e URLs reais, sem inventar títulos ou funcionalidades.
