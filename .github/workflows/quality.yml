@@ -1,20 +1,15 @@
-name: PG Bot - Qualidade
+name: Qualidade PG Bot
 
 on:
-  push:
-    branches: [main]
   pull_request:
+  push:
     branches: [main]
 
 permissions:
   contents: read
 
-concurrency:
-  group: pg-bot-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  unit-and-build:
+  quality:
     name: Testes e build
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -22,14 +17,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: npm
       - run: npm ci
       - run: npm test
       - run: npm run build
 
   browser:
-    name: E2E - ${{ matrix.browser }}
+    name: Navegador ${{ matrix.browser }}
+    needs: quality
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -40,16 +36,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps ${{ matrix.browser }}
-      - run: npm run test:e2e:ci -- --project=${{ matrix.browser }}
-      - name: Preservar traces de falha
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pg-bot-traces-${{ matrix.browser }}
-          path: test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+      - run: npx playwright test --project=${{ matrix.browser }}
