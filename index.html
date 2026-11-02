@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080f1d">
+  <meta name="description" content="PG Bot: seu assistente local para PG Arcade e PG Estratégia. Dicas, controles, progresso, acessibilidade e orientações sem enviar mensagens para servidores.">
+  <link rel="canonical" href="https://pabloguilherme1121.github.io/PG-Bot/">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+  <meta property="og:title" content="PG Bot | Ajuda para Arcade e Estratégia">
+  <meta property="og:description" content="Pergunte sobre jogos, missões, progresso e controles. Respostas locais, sem cadastro.">
+  <meta property="og:url" content="https://pabloguilherme1121.github.io/PG-Bot/">
+  <meta property="og:type" content="website">
+  <title>PG Bot | Central de ajuda</title>
+</head>
+<body>
+  <a class="skip-link" href="#chat-title">Pular para a conversa</a>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="PG Bot, página inicial">
+        <span class="brand-avatar"><img src="./assets/mascot.webp" alt="" width="38" height="44" decoding="async"></span>
+        <span><strong>PG <span>BOT</span></strong><small>Seu copiloto de jogos</small></span>
+      </a>
+      <nav class="global-nav" aria-label="Sites do ecossistema PG">
+        <a href="https://pabloguilherme1121.github.io/PG-Arcade/">Arcade</a>
+        <a href="https://pabloguilherme1121.github.io/PG-Estrategia/">Estratégia</a>
+        <a href="https://pabloguilherme1121.github.io/PG-portfolio/">Portfólio</a>
+      </nav>
+      <span class="local-chip"><span class="local-dot"></span> Local e privado</span>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div class="eyebrow"><span class="small-mark">PG / SISTEMA DE AJUDA</span><span class="version">VERSÃO 1.0</span></div>
+        <h1 id="page-title">A próxima jogada<br><em>começa com uma pergunta.</em></h1>
+        <p>Um lugar para entender controles, regras e estratégia. Selecione o jogo, pergunte e continue de onde parou.</p>
+      </section>
+      <div class="workbench">
+        <aside class="controls" aria-labelledby="context-title">
+          <div class="aside-header"><span class="section-number">01</span><h2 id="context-title">Onde você está jogando?</h2></div>
+          <div class="mode-selector" role="group" aria-label="Selecionar produto">
+            <button type="button" id="mode-arcade" data-mode="arcade" aria-pressed="true">
+              <span class="mode-symbol" aria-hidden="true">◈</span><span><strong>PG Arcade</strong><small>Jogos e recordes</small></span>
+            </button>
+            <button type="button" id="mode-estrategia" data-mode="estrategia" aria-pressed="false">
+              <span class="mode-symbol" aria-hidden="true">⌗</span><span><strong>PG Estratégia</strong><small>Missões e táticas</small></span>
+            </button>
+          </div>
+          <div class="aside-divider"></div>
+          <div class="aside-header"><span class="section-number">02</span><h2>Perguntas rápidas</h2></div>
+          <div id="quick-actions" class="quick-actions" aria-label="Perguntas frequentes"></div>
+          <div class="aside-divider"></div>
+          <div class="context-card">
+            <div class="context-icon" aria-hidden="true">↗</div>
+            <p class="context-eyebrow">VOLTAR AO JOGO</p>
+            <h3 id="context-name">PG Arcade</h3>
+            <p id="context-note">Abra a biblioteca completa e continue jogando.</p>
+            <a id="context-link" class="context-link" href="https://pabloguilherme1121.github.io/PG-Arcade/">Abrir PG Arcade <span aria-hidden="true">↗</span></a>
+          </div>
+        </aside>
+        <section class="chat-panel" aria-labelledby="chat-title">
+          <div class="chat-header">
+            <div class="chat-avatar"><img src="./assets/mascot.webp" alt="" width="43" height="49" decoding="async"></div>
+            <div><h2 id="chat-title">Converse com o PG Bot</h2><p><span class="online-dot"></span> Assistente local disponível</p></div>
+            <button type="button" class="reset-button" id="clear-chat" aria-label="Limpar conversa">Limpar</button>
+          </div>
+          <div class="context-banner" id="context-banner" role="status">Modo: PG Arcade · ajuda sobre jogos e controles</div>
+          <ol id="messages" class="messages" role="log" aria-live="polite" aria-label="Mensagens da conversa" aria-relevant="additions"></ol>
+          <div class="chat-bottom">
+            <form id="question-form">
+              <label for="question">Sua pergunta</label>
+              <div class="composer">
+                <textarea id="question" name="question" rows="2" maxlength="240" placeholder="Ex.: Como funciona o modo offline?" autocomplete="off" spellcheck="true" required></textarea>
+                <button class="send-button" type="submit">Enviar <span aria-hidden="true">↗</span></button>
+              </div>
+              <div class="composer-meta"><span>Enter para enviar. Shift + Enter para quebrar linha.</span><output id="char-count" for="question">0 / 240</output></div>
+            </form>
+            <div class="privacy-note"><span aria-hidden="true">◎</span> Sem cadastro, sem envio de mensagens e sem armazenamento da conversa.</div>
+          </div>
+        </section>
+      </div>
+      <section class="info-strip" aria-label="Como funciona">
+        <div><span class="info-num">01 /</span><strong>Contexto real</strong><p>Respostas específicas quando você informa um jogo ou missão.</p></div>
+        <div><span class="info-num">02 /</span><strong>Sem respostas inventadas</strong><p>O bot informa quando não pode ver a partida em outro site.</p></div>
+        <div><span class="info-num">03 /</span><strong>Funciona offline</strong><p>A interface continua acessível após a instalação dos arquivos essenciais.</p></div>
+      </section>
+    </main>
+    <footer class="footer"><span>PG BOT <small>por PG Tech</small></span><p>Assistente local com regras programadas. Não é IA generativa conectada.</p><a href="https://github.com/pabloguilherme1121/PG-Bot">Código no GitHub ↗</a></footer>
+  </div>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
