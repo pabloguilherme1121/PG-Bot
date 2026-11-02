@@ -39,6 +39,22 @@ export function parseObjectFields(body){
  for(const match of body.matchAll(re))try{result[match[1]]=decodeString(match[2])}catch{}
  return result;
 }
+export function parseGameManifest(meta,slug){
+ if(!meta||typeof meta!=='object'||Array.isArray(meta))throw Error('Manifesto inválido: '+slug);
+ const validText=(field,max)=>typeof field==='string'&&field.trim().length>=10&&field.length<=max&&!/<[^>]+>/.test(field)&&!/[\x00-\x1f\x7f]/.test(field);
+ if(meta.id!==slug||!/^[-a-z0-9]{1,64}$/.test(slug))throw Error('ID divergente no manifesto: '+slug);
+ if(meta.category!=='estrategia'||typeof meta.engine!=='string'||!/^[a-z][a-z0-9-]{1,50}$/.test(meta.engine))throw Error('Motor ou categoria inválidos: '+slug);
+ if(typeof meta.title!=='string'||meta.title.trim().length<3||!safeField('name',meta.title))throw Error('Título do manifesto inválido: '+slug);
+ if(!validText(meta.objective,1500)||!validText(meta.controls?.touch,1200))throw Error('Objetivo ou toque ausente: '+slug);
+ if(meta.controls.keyboard!==undefined&&!validText(meta.controls.keyboard,1200))throw Error('Teclado inválido: '+slug);
+ if(!Array.isArray(meta.strategyPlan)||meta.strategyPlan.length!==3||!meta.strategyPlan.every(step=>validText(step,1200)))throw Error('Plano de três passos inválido: '+slug);
+ if(typeof meta.version!=='string'||!/^\d+\.\d+\.\d+$/.test(meta.version))throw Error('Versão inválida: '+slug);
+ const help='Toque: '+meta.controls.touch.trim()+
+  (meta.controls.keyboard?' Teclado: '+meta.controls.keyboard.trim():'')+
+  ' Plano de 3 passos: '+meta.strategyPlan.map((step,i)=>(i+1)+'. '+step.trim()).join(' ');
+ if(!safeField('help',help))throw Error('Instruções inseguras: '+slug);
+ return {name:meta.title.trim(),description:meta.objective.trim(),help};
+}
 function staticObjects(text){
  const items=[];
  const start=/\{\s*id\s*:\s*["'][a-z0-9-]+["']/g;
@@ -126,11 +142,13 @@ async function strategyMetadata(root,map){
   const title=html.match(/<title>\s*([^<]+?)\s*<\/title>/i)?.[1]?.replace(/\s*\|\s*PG Estrat[eé]gia.*$/i,'');
   const description=html.match(/<meta\b[^>]*name="description"[^>]*content="([^"]+)"/i)?.[1];
   const legend=html.match(/<p\s+class="legend"[^>]*>([^<]+)<\/p>/i)?.[1];
-  strictAdd(map,'estrategia',entry.name,{
-   name:title?cleanHtml(title):undefined,
-   description:description?cleanHtml(description):undefined,
-   help:legend?cleanHtml(legend):undefined
-  });
+  const manifestFile=join(independent,entry.name,'game.meta.json');
+  const fields=existsSync(manifestFile)
+   ?parseGameManifest(JSON.parse(read(manifestFile)),entry.name)
+   :{name:title?cleanHtml(title):undefined,
+     description:description?cleanHtml(description):undefined,
+     help:legend?cleanHtml(legend):undefined};
+  strictAdd(map,'estrategia',entry.name,fields);
  }
 }
 export async function extractMetadata({arcadeRoot,strategyRoot}){
