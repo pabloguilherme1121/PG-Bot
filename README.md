@@ -21,6 +21,7 @@ O site é um PWA: depois de uma visita conectada e de armazenar os recursos no n
 - Sugestão de partida: escolhe um título real dentro da busca e dos filtros ativos, sem inventar rankings.
 - Link de ajuda: permite compartilhar uma URL com `projeto` e `jogo` validados, sem incluir perguntas ou histórico de conversa. Se o navegador bloquear a cópia, o endereço atual pode ser copiado manualmente.
 - Limpar conversa: apaga as mensagens exibidas nesta aba. Perguntas continuam sem armazenamento permanente ou envio a servidores.
+- Plano de 3 passos: reúne objetivo, controles e dica do título selecionado, usando somente o catálogo local. O painel de mensagens pode receber foco no teclado para ler orientações longas.
 - Links diretos para qualquer ID do catálogo, mesmo fora dos primeiros 80 resultados exibidos.
 - Cache PWA v2: invalida somente versões antigas do próprio PG Bot, preservando o cache separado dos jogos.
 
