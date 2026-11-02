@@ -1,10 +1,34 @@
 // PG Bot independente: somente regras locais, sem token, cookies ou API de conversação.
+import {favoriteKey,loadFavoriteKeys,saveFavoriteKeys,toggleFavoriteKey,favoriteGames} from './favorites.mjs';
 export const normalize = text => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 const bounded=text=>typeof text==='string'&&text.length<=240?normalize(text):'';
 export function filterGames(games,environment,search='',kind='all'){
  const terms=normalize(search).slice(0,80).split(/\s+/).filter(Boolean);
- if(!['all','mission','game'].includes(kind))return [];
- return games.filter(g=>g.environment===environment&&(kind==='all'||g.kind===kind)&&terms.every(term=>normalize(g.name+' '+g.category+' '+g.id).includes(term)));
+ if(!Array.isArray(games)||!['arcade','estrategia'].includes(environment)||!['all','mission','game'].includes(kind))return [];
+ const results=[];
+ for(const game of games){
+  if(game.environment!==environment||(kind!=='all'&&game.kind!==kind))continue;
+  const title=normalize(game.name+' '+game.id);
+  const category=normalize(game.category+' '+(game.difficulty||''));
+  const details=normalize((game.description||'')+' '+(game.help||'')+' '+(game.hint||''));
+  if(!terms.every(term=>title.includes(term)||category.includes(term)||details.includes(term)))continue;
+  const score=terms.reduce((total,term)=>total+(title.includes(term)?5:category.includes(term)?3:1),0);
+  results.push({game,score});
+ }
+ if(terms.length)results.sort((a,b)=>b.score-a.score);
+ return results.map(result=>result.game);
+}
+export function buildGameGuide(game){
+ if(!game||!['arcade','estrategia'].includes(game.environment)||typeof game.name!=='string'||!game.name.trim())return null;
+ const description=typeof game.description==='string'?game.description.trim():'';
+ const help=typeof game.help==='string'?game.help.trim():'';
+ const hint=typeof game.hint==='string'?game.hint.trim():'';
+ const lines=['Guia rápido: '+game.name.trim(), 'Objetivo: '+(description||'Consulte o objetivo exibido dentro da partida.')];
+ if(game.kind==='mission'&&typeof game.difficulty==='string'&&game.difficulty.trim())lines.push('Dificuldade: '+game.difficulty.trim());
+ if(help)lines.push('Regras e controles: '+help);
+ if(hint&&hint!==help)lines.push('Dica do jogo: '+hint);
+ lines.push('Esta página não acompanha o turno, o placar nem o andamento da sua partida em tempo real.');
+ return lines.join('\n\n');
 }
 export function contextUrl(game){
  if(!game||!['arcade','estrategia'].includes(game.environment)||typeof game.id!=='string'||!/^[a-z0-9][a-z0-9-]{0,63}$/.test(game.id))return null;
@@ -33,6 +57,8 @@ export function answerQuestion(question,game){
   return {topic:'acessibilidade',answer:'Use Tab para avançar pelos controles e Enter ou Espaço para ativar botões. O PG Arcade também oferece atalhos Alt + Shift + B para tabuleiro, H para ajuda e R para reiniciar. O suporte varia por jogo; consulte as orientações na partida.'};
  if(/reinic|recomec|paus|retom|continuar|reset|desfaz/.test(q))
   return {topic:'reiniciar',answer:'Abra o jogo e use Pausar, Continuar, Reiniciar ou Desfazer quando esses comandos estiverem disponíveis. Reiniciar pode encerrar a partida atual; confirme na interface antes de continuar.'};
+ if(/guia rapido|guia da partida|resumo da partida|preparar partida/.test(q))
+  return {topic:'guia',answer:buildGameGuide(game)||fallback};
  if(/controle|tecla|botao|seta|mover|tocar|touch|comando|arrast/.test(q))
   return {topic:'controles',answer:'Controles de '+game.name+': '+(game.help||game.description||'Consulte os comandos exibidos na própria partida.')};
  if(/estrateg|dica|como venc|como ganh|ganhar|melhor jogad|proxima jogad|proximo passo|ajuda/.test(q))
@@ -47,7 +73,7 @@ const selectors={
 };
 function initDocument(){
  const $=key=>document.getElementById(selectors[key]||key);
- let games=[],environment='arcade',selected=null,kind='all';
+ let games=[],environment='arcade',selected=null,kind='all',favorites=new Set(),favoritesOnly=false;
  const url=new URL(location.href);
  const requestedEnvironment=url.searchParams.get('projeto');
  const requestedId=url.searchParams.get('jogo');
@@ -63,11 +89,15 @@ function initDocument(){
  function setSelected(game){
   selected=game??null;
   $('name').textContent=selected?.name||'Nenhum jogo encontrado';
-  $('description').textContent=selected?.description||'Digite outro termo para buscar um jogo.';
+  $('description').textContent=selected?.description||(favoritesOnly?'Nenhum favorito encontrado com esses filtros. Desative o filtro ou adicione um jogo aos favoritos.':'Digite outro termo para buscar um jogo.');
   const destination=selected?.url||'https://pabloguilherme1121.github.io/PG-Arcade/';
   const u=new URL(destination);
   if(u.hostname==='pabloguilherme1121.github.io'&&(u.pathname.startsWith('/PG-Arcade/')||u.pathname.startsWith('/PG-Estrategia/'))) $('link').href=u.href;
   $('link').hidden=!selected;
+  const isFavorite=!!selected&&favorites.has(favoriteKey(selected));
+  $('favorite-game').disabled=!selected;
+  $('favorite-game').setAttribute('aria-pressed',String(isFavorite));
+  $('favorite-game').textContent=isFavorite?'Remover dos favoritos':'Adicionar aos favoritos';
   const current=new URL(location.href);
   current.searchParams.set('projeto',environment);
   if(selected)current.searchParams.set('jogo',selected.id);
@@ -75,7 +105,8 @@ function initDocument(){
   history.replaceState(null,'',current.pathname+current.search+current.hash);
  }
  function renderChoices(preferredId=''){
-  const shown=filterGames(games,environment,$('search').value,kind);
+  const matches=filterGames(games,environment,$('search').value,kind);
+  const shown=favoritesOnly?favoriteGames(matches,favorites):matches;
   const limited=shown.slice(0,80);
   // IDs recebidos por link devem continuar selecionáveis, mesmo fora das primeiras 80 opções.
   const preferred=shown.find(g=>g.id===preferredId)||shown.find(g=>g.id===selected?.id);
@@ -95,6 +126,7 @@ function initDocument(){
  function setEnvironment(next){
   if(next!=='arcade'&&next!=='estrategia')return;
   const changed=environment!==next;environment=next;
+  if(changed){favoritesOnly=false;$('favorites-only').checked=false;}
   document.querySelectorAll('[data-environment]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.environment===environment)));
   $('search').value='';kind='all';$('game-kind').value='all';selected=null;renderChoices(changed?'':requestedId);
   if(changed)addMessage('Catálogo alterado para PG '+(environment==='arcade'?'Arcade':'Estratégia')+'. Selecione o título desejado para receber orientações próprias.');
@@ -111,6 +143,21 @@ function initDocument(){
  document.querySelectorAll('[data-environment]').forEach(button=>button.addEventListener('click',()=>setEnvironment(button.dataset.environment)));
  $('search').addEventListener('input',()=>renderChoices());
  $('game-kind').addEventListener('change',()=>{kind=$('game-kind').value;renderChoices();});
+ $('favorites-only').addEventListener('change',()=>{
+  favoritesOnly=$('favorites-only').checked;
+  renderChoices();
+  $('action-status').textContent=favoritesOnly?'Exibindo somente favoritos deste projeto.':'Exibindo todos os títulos disponíveis.';
+ });
+ $('favorite-game').addEventListener('click',()=>{
+  if(!selected)return;
+  const current=selected;
+  const wasFavorite=favorites.has(favoriteKey(current));
+  favorites=toggleFavoriteKey(favorites,current);
+  let persisted=false;
+  try{persisted=saveFavoriteKeys(window.localStorage,favorites)}catch{}
+  renderChoices(current.id);
+  $('action-status').textContent=(wasFavorite?'Removido dos favoritos.':'Adicionado aos favoritos.')+(persisted?' Preferência salva neste navegador.':' O navegador não permitiu salvar; favorito disponível somente nesta visita.');
+ });
  $('random-game').addEventListener('click',()=>{
   const pool=filterGames(games,environment,$('search').value,kind);
   const next=suggestGame(pool);
@@ -145,6 +192,7 @@ function initDocument(){
  }).then(data=>{
   if(!data||!Array.isArray(data.games)||data.games.length<300)throw Error('Dados do catálogo incompletos');
   games=data.games;
+  try{favorites=loadFavoriteKeys(window.localStorage,games)}catch{favorites=new Set()}
   $('arcade-count').textContent=String(data.counts.arcade);
   $('mission-count').textContent=String(data.counts.missions);
   $('original-count').textContent=String(data.counts.classic+data.counts.independent);

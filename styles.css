@@ -17,6 +17,12 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit;text-deco
 .notice{padding:22px 25px;border:1px solid #476b60;border-radius:15px;background:linear-gradient(110deg,#153128,#142933);display:flex;justify-content:space-between;gap:20px;align-items:center}.notice>div{display:flex;gap:16px;align-items:start}.notice-icon{width:35px;height:35px;display:grid;place-items:center;color:var(--lime);border-radius:10px;border:1px solid #72ab84}.notice h2{font-size:16px;margin:0 0 5px}.notice p{font-size:12px;color:#d3e3de;line-height:1.65;margin:0;max-width:720px}.notice a{flex:none;color:var(--lime);font-size:12px;font-weight:850;white-space:nowrap;min-height:44px;display:flex;align-items:center;gap:8px}
 .site-footer{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:space-between;padding:29px 0 35px;margin-top:35px;border-top:1px solid #254354}.site-footer strong{font-size:14px;letter-spacing:-.04em}.site-footer strong span{color:#899fa8;font-size:10px;font-weight:550}.site-footer p{font-size:11px;color:#a8bec7;max-width:300px;line-height:1.5}.site-footer nav a{font-size:12px;color:#b8cbd1;min-height:36px;display:inline-flex;align-items:center}
 .selector-panel #game-kind{height:46px;padding:9px 11px}
+.favorite-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.favorite-tools label,.favorite-tools button{display:flex;flex:1 1 140px;min-width:0;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 12px;border:1px solid #668c82;border-radius:10px;background:#1c3a43;color:#e5f5e8;font-size:12px;font-weight:800}
+.favorite-tools label{cursor:pointer}
+.favorite-tools input{width:18px;height:18px;flex:none;margin:0;accent-color:var(--lime)}
+.favorite-tools button[aria-pressed=true]{background:#284b35;color:#d0ffb0;border-color:#b9ee86}
+.favorite-note{font-size:11px;color:#b6cdd6;line-height:1.5;margin:9px 0 0}
 .game-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
 .game-actions button{flex:1 1 120px;min-height:44px;border-radius:10px;background:#1c3a43;color:#e5f5e8;border:1px solid #668c82;padding:8px 10px;font-weight:800;font-size:12px}
 .game-actions button:hover{border-color:var(--lime);color:var(--lime)}
