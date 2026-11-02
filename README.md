@@ -25,7 +25,8 @@ O site é um PWA: depois de uma visita conectada e de armazenar os recursos no n
 - Limpar conversa: apaga as mensagens exibidas nesta aba. Perguntas continuam sem armazenamento permanente ou envio a servidores.
 - Plano de 3 passos: reúne objetivo, controles e dica do título selecionado, usando somente o catálogo local. O painel de mensagens pode receber foco no teclado para ler orientações longas.
 - Links diretos para qualquer ID do catálogo, mesmo fora dos primeiros 80 resultados exibidos.
-- Cache PWA v3: invalida somente versões antigas do próprio PG Bot, preservando o cache separado dos jogos.
+- Histórico local de até seis títulos consultados, incluindo Arcade e Estratégia, com retorno direto e opção de limpar. Guarda só IDs válidos, sem retomar o estado real das partidas.
+- Cache PWA v4: invalida somente versões antigas do próprio PG Bot, preservando o cache separado dos jogos.
 
 ## Favoritos locais
 
@@ -39,6 +40,7 @@ O site é um PWA: depois de uma visita conectada e de armazenar os recursos no n
 - `index.html`: navegação, seleção dos catálogos e chat acessível.
 - `styles.css`: design responsivo, telas 320/390 px, estilos de foco e redução de movimento.
 - `app.mjs`: motor de perguntas e interface, sem bibliotecas de IA.
+- `recent.mjs`: histórico local curto de consultas, sem registrar perguntas ou progresso.
 - `data/games.json`: snapshot versionado de IDs, nomes, descrições e instruções reais dos dois catálogos.
 - `brand/pg-bot/mascot.webp`: mascote original, servido localmente.
 - `sw.js`, `manifest.webmanifest`: cache e PWA isolados dos outros projetos.

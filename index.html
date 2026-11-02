@@ -55,6 +55,11 @@
     <div class="game-actions"><button id="random-game" type="button">Sugerir partida</button><button id="share-game" type="button" disabled>Copiar link de ajuda</button><button id="plan-game" type="button">Plano de 3 passos</button></div>
     <p id="action-status" class="action-status" role="status" aria-live="polite"></p>
     <div class="chosen-game"><span class="chosen-tag">JOGO SELECIONADO</span><strong id="game-name">Escolha uma partida</strong><p id="game-description">As orientações aparecem após selecionar um jogo.</p><a id="game-link" href="https://pabloguilherme1121.github.io/PG-Arcade/" target="_blank" rel="noopener noreferrer">Abrir partida <span aria-hidden="true">↗</span></a></div>
+    <section class="recent-panel" aria-labelledby="recent-title">
+     <div class="recent-head"><h4 id="recent-title">Consultados recentemente</h4><button id="clear-recent" type="button" disabled>Limpar lista</button></div>
+     <div id="recent-games" class="recent-games" aria-live="polite"><p class="recent-empty">Carregando histórico local.</p></div>
+     <p class="recent-note">Apenas os IDs dos títulos ficam neste navegador, nunca perguntas ou placares.</p>
+    </section>
    </aside>
    <section class="chat-panel" aria-label="Conversa com o PG Bot">
     <header class="chat-header"><img src="./brand/pg-bot/mascot.webp" width="48" height="54" alt=""><div><strong>PG Bot</strong><span>Assistente contextual · sem IA externa</span></div><span class="chat-live"><span class="status-dot" aria-hidden="true"></span> Local</span></header>
