@@ -113,7 +113,7 @@ function initDocument(){
   const status=$('live-status');
   if(!$('live-enable').checked){status.textContent='Desativado. Ative esta opção e a transmissão dentro do jogo.';return;}
   if(!liveTick||!isLiveForSelection(liveTick,selected)){
-   status.textContent=liveTick&&Date.now()-liveTick.timestamp>LIVE_TTL_MS?'Dados expirados. Confira se a aba do jogo continua ativa.':'Aguardando dados de Domínio Territorial para o jogo selecionado.';
+   status.textContent=liveTick&&Date.now()-liveTick.timestamp>LIVE_TTL_MS?'Dados expirados. Confira se a aba do jogo continua ativa.':'Aguardando dados da partida selecionada. Ative a transmissão no próprio jogo.';
    return;
   }
   status.textContent='Dados recebidos nesta aba: '+liveSummary(liveTick)+' Atualizado há '+Math.max(0,Math.floor((Date.now()-liveTick.timestamp)/1000))+' s.';
@@ -230,7 +230,7 @@ function initDocument(){
   const q=typeof text==='string'?text.trim():'';
   if(!q||q.length>240)return;
   addMessage(q,'user');
-  const asksLive=/(?:meu turno|turno atual|placar atual|pontua(?:ção|cao) atual|situa(?:ção|cao) atual|minha partida)/i.test(q);
+  const asksLive=/(?:meu turno|turno atual|placar atual|pontua(?:ção|cao) atual|situa(?:ção|cao) atual|minha partida|quantas jogadas|jogadas atuais|meus movimentos)/i.test(q);
   const reply=asksLive&&$('live-enable').checked&&isLiveForSelection(liveTick,selected)
    ? {topic:'situacao',answer:'Resumo local recebido da aba da partida: '+liveSummary(liveTick)+' Confira o jogo para confirmar o estado atual.'}
    : answerQuestion(q,selected);
