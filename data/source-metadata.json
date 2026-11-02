@@ -793,6 +793,11 @@
     "description": "Partida de damas 8×8 contra o computador, com captura obrigatória, múltiplos saltos e promoção a dama.",
     "help": "Toque numa peça clara e depois na casa destacada para mover. Se houver captura, ela é obrigatória. A dama pode andar nas diagonais nos dois sentidos."
   },
+  "estrategia:dominio-territorial": {
+    "name": "Domínio Territorial",
+    "description": "Capturar o bastião central neutro (0,0) e a base inimiga (0,-1) em até 20 turnos.",
+    "help": "Toque: Toque num hexágono aliado e depois num vizinho para atacar. Use Reforçar e Encerrar turno no painel. Teclado: Tab percorre as células, setas movem o foco; Enter ou Espaço seleciona ou ataca, e os botões executam reforço e fim de turno. Plano de 3 passos: 1. Conquiste flancos neutros para aumentar a produção de suprimentos a cada turno. 2. Reúna tropas suficientes para superar o multiplicador defensivo de 1,5 do bastião central. 3. Mantenha uma guarnição aliada enquanto avança até a base inimiga antes de 20 turnos."
+  },
   "estrategia:espelhos-sinal": {
     "name": "Espelhos de Sinal",
     "description": "Espelhos de Sinal: jogo de estratégia com trajetórias, refletores, dois modos, três dificuldades e controles para celular."
@@ -1556,6 +1561,10 @@
     "name": "Frota Oculta",
     "description": "Localize a frota inimiga num mapa 6×6. Cada disparo consome um turno; use o sonar para deduzir a posição das embarcações.",
     "help": "Toque em um quadrante para atacar. Sonar revela o número de navios numa linha, mas gasta um turno. Reparos preservam sua base sob pressão."
+  },
+  "estrategia:gravidade-cristais": {
+    "name": "Gravidade dos Cristais",
+    "description": "Gravidade dos Cristais: incline o tabuleiro e conduza dois cristais aos seus alvos. 37º jogo original do PG Estratégia."
   },
   "estrategia:guardioes-biomas": {
     "name": "Guardiões dos Biomas",

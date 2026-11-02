@@ -65,5 +65,5 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Conferir todos os 336 IDs e destinos
+      - name: Conferir IDs e destinos dos catálogos
         run: node scripts/audit-catalog.mjs --arcade-root=external/PG-Arcade --strategy-root=external/PG-Estrategia

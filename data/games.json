@@ -8,7 +8,7 @@
     "arcade": 150,
     "missions": 150,
     "classic": 9,
-    "independent": 27
+    "independent": 29
   },
   "games": [
     {
@@ -3677,6 +3677,28 @@
       "description": "Travessia do Vale: leve cargas e animais em segurança para a outra margem.",
       "help": "Abra a partida para consultar o PG Bot com informações em tempo real.",
       "url": "https://pabloguilherme1121.github.io/PG-Estrategia/independentes/travessia-vale/",
+      "environment": "estrategia",
+      "kind": "game"
+    },
+    {
+      "id": "gravidade-cristais",
+      "name": "Gravidade dos Cristais",
+      "category": "Jogos originais",
+      "description": "Gravidade dos Cristais: incline o tabuleiro e conduza dois cristais aos seus alvos. 37º jogo original do PG Estratégia.",
+      "help": "Incline o tabuleiro pelos quatro botões de direção ou teclado. No modo Deslizar, os dois cristais seguem até um obstáculo; no modo Passo, avançam uma casa. Use Pausar, Desfazer e Pedir dica na partida.",
+      "hint": "Planeje a sequência para levar A ao destino A e B ao destino B. A orientação da arena considera os cristais e rochas reais da partida.",
+      "url": "https://pabloguilherme1121.github.io/PG-Estrategia/independentes/gravidade-cristais/",
+      "environment": "estrategia",
+      "kind": "game"
+    },
+    {
+      "id": "dominio-territorial",
+      "name": "Domínio Territorial",
+      "category": "Jogos originais",
+      "description": "Capturar o bastião central neutro (0,0) e a base inimiga (0,-1) em até 20 turnos.",
+      "help": "Toque: Toque num hexágono aliado e depois num vizinho para atacar. Use Reforçar e Encerrar turno no painel. Teclado: Tab percorre as células, setas movem o foco; Enter ou Espaço seleciona ou ataca, e os botões executam reforço e fim de turno. Plano de 3 passos: 1. Conquiste flancos neutros para aumentar a produção de suprimentos a cada turno. 2. Reúna tropas suficientes para superar o multiplicador defensivo de 1,5 do bastião central. 3. Mantenha uma guarnição aliada enquanto avança até a base inimiga antes de 20 turnos.",
+      "hint": "Conquiste os flancos para gerar suprimentos, reúna tropas para o bastião central e só então avance até a base adversária.",
+      "url": "https://pabloguilherme1121.github.io/PG-Estrategia/independentes/dominio-territorial/",
       "environment": "estrategia",
       "kind": "game"
     }

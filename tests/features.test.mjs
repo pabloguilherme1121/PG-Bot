@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {filterGames,contextUrl,suggestGame,buildGameGuide,answerQuestion} from '../app.mjs';
 const {games}=JSON.parse(readFileSync('data/games.json','utf8'));
-test('filtro por tipo preserva a divisão entre 150 missões, 36 jogos originais e Arcade',()=>{
+test('filtro por tipo preserva a divisão entre 150 missões, 38 jogos originais e Arcade',()=>{
  assert.equal(filterGames(games,'estrategia','','mission').length,150);
- assert.equal(filterGames(games,'estrategia','','game').length,36);
+ assert.equal(filterGames(games,'estrategia','','game').length,38);
  assert.equal(filterGames(games,'arcade','','game').length,150);
  assert.equal(filterGames(games,'arcade','','mission').length,0);
  assert.equal(filterGames(games,'estrategia','conquista aurora','mission').length,1);

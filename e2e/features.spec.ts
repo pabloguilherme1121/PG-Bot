@@ -4,7 +4,7 @@ for(const width of [320,390]){
   await page.setViewportSize({width,height:800});
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('./?projeto=estrategia');
-  await expect(page.locator('#game-count')).toContainText('186');
+  await expect(page.locator('#game-count')).toContainText('188');
   await page.locator('#game-kind').selectOption('mission');
   await expect(page.locator('#game-count')).toContainText('150');
   await page.locator('#game-search').fill('conquista aurora');
@@ -12,7 +12,7 @@ for(const width of [320,390]){
   await expect(page.locator('#game-link')).toHaveAttribute('href',/PG-Estrategia\/#est-001/);
   await page.locator('#game-kind').selectOption('game');
   await page.locator('#game-search').fill('');
-  await expect(page.locator('#game-count')).toContainText('36');
+  await expect(page.locator('#game-count')).toContainText('38');
   await page.locator('#random-game').click();
   await expect(page.locator('#action-status')).toContainText('Sugestão selecionada');
   await page.locator('#question').fill('Como jogar?');

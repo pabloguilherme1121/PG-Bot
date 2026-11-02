@@ -6,10 +6,10 @@ const {games,counts}=JSON.parse(readFileSync('data/games.json','utf8'));
 const snake=games.find(g=>g.environment==='arcade'&&g.id==='snake');
 const mission=games.find(g=>g.environment==='estrategia'&&g.id==='est-001');
 test('catálogos oficiais completos sem IDs repetidos por ambiente',()=>{
- assert.deepEqual(counts,{arcade:150,missions:150,classic:9,independent:27});
- assert.equal(games.length,336);
+ assert.deepEqual(counts,{arcade:150,missions:150,classic:9,independent:29});
+ assert.equal(games.length,338);
  assert.equal(new Set(games.filter(g=>g.environment==='arcade').map(g=>g.id)).size,150);
- assert.equal(new Set(games.filter(g=>g.environment==='estrategia').map(g=>g.id)).size,186);
+ assert.equal(new Set(games.filter(g=>g.environment==='estrategia').map(g=>g.id)).size,188);
  for(const game of games){assert.ok(game.name.length>1&&game.description.length>10,game.id);assert.ok(game.url.startsWith('https://pabloguilherme1121.github.io/PG-'),game.id)}
 });
 test('busca normaliza acentos e filtra por ambiente e por nome',()=>{
