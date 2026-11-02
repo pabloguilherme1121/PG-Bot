@@ -57,3 +57,13 @@ test('novo jogo na fonte não entra no catálogo sem revisão explícita',()=>{
  assert.equal(proposed.catalog.games.length,1);
  assert.ok(proposed.review.some(x=>x.key==='arcade:novo'&&x.reason==='novo ID sem cadastro'));
 });
+
+test('instruções removidas da fonte exigem revisão sem apagar ajuda existente',()=>{
+ const catalog={games:[{id:'snake',environment:'arcade',name:'Snake',description:'Desvie dos obstáculos',help:'Use as setas para mover.'}]};
+ const previous={'arcade:snake':{name:'Snake',description:'Desvie dos obstáculos',help:'Use as setas para mover.'}};
+ const current={'arcade:snake':{name:'Snake',description:'Desvie dos obstáculos'}};
+ const proposal=proposeCatalogChanges(catalog,previous,current);
+ assert.equal(proposal.catalog.games[0].help,'Use as setas para mover.');
+ assert.equal(proposal.applied.length,0);
+ assert.ok(proposal.review.some(item=>item.key==='arcade:snake'&&item.field==='help'&&item.reason==='campo removido da fonte'));
+});
