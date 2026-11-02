@@ -1,0 +1,13 @@
+import {readFileSync,existsSync} from 'node:fs';
+const html=readFileSync('index.html','utf8');
+const css=readFileSync('styles.css','utf8');
+const js=readFileSync('app.mjs','utf8');
+const data=JSON.parse(readFileSync('data/games.json','utf8'));
+const files=['index.html','app.mjs','styles.css','icon.svg','manifest.webmanifest','sw.js','data/games.json','brand/pg-bot/mascot.webp'];
+for(const path of files)if(!existsSync(path))throw Error('Recurso ausente: '+path);
+for(const token of ['id="chat-form"','id="game-select"','id="game-search"','id="chat-log"','data-environment="arcade"','data-environment="estrategia"'])if(!html.includes(token))throw Error('Elemento ausente: '+token);
+if(html.includes('http://')||js.includes('eval(')||js.includes('innerHTML'))throw Error('Padrão inseguro no site');
+if(!css.includes('max-width:430px')||!css.includes('prefers-reduced-motion'))throw Error('Responsividade incompleta');
+if(data.counts.arcade!==150||data.counts.missions!==150||data.counts.classic+data.counts.independent!==36)throw Error('Cobertura do catálogo não corresponde aos jogos existentes');
+if(data.games.length!==336)throw Error('Dados do bot incompletos');
+console.log('Build estático verificado: '+data.games.length+' contextos de jogo, '+files.length+' recursos, CSS responsivo.');

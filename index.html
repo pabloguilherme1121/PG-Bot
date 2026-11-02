@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c1723">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="PG Bot, central gratuita de ajuda local para os 150 jogos do PG Arcade, as 150 missões e os 36 jogos independentes do PG Estratégia.">
+<link rel="canonical" href="https://pabloguilherme1121.github.io/PG-Bot/">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./styles.css">
+<meta property="og:title" content="PG Bot | Ajuda para jogar melhor">
+<meta property="og:description" content="Ajuda por jogo, dicas, controles e caminhos para o PG Arcade e o PG Estratégia. Sem conta e sem IA conectada.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pabloguilherme1121.github.io/PG-Bot/">
+<title>PG Bot | Assistente de jogos do PG Arcade e PG Estratégia</title>
+</head>
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+<div class="page">
+<header class="site-header">
+ <a class="brand" href="./"><span class="brand-icon" aria-hidden="true"><img src="./brand/pg-bot/mascot.webp" alt="" width="38" height="44"></span><span><strong>PG<span class="brand-accent">BOT</span></strong><small>CENTRAL DE AJUDA</small></span></a>
+ <nav aria-label="Sites do ecossistema"><a href="https://pabloguilherme1121.github.io/PG-Arcade/">PG Arcade</a><a href="https://pabloguilherme1121.github.io/PG-Estrategia/">PG Estratégia</a><a class="nav-code" href="https://github.com/pabloguilherme1121/PG-Bot">Código-fonte <span aria-hidden="true">↗</span></a></nav>
+</header>
+<main id="conteudo">
+ <section class="hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+   <div class="eyebrow"><span class="status-dot" aria-hidden="true"></span> UM BOT PARA TODO O ECOSSISTEMA PG</div>
+   <h1 id="hero-title">Sua próxima jogada <em>começa aqui.</em></h1>
+   <p>Encontre o jogo, tire dúvidas e volte direto para a partida. O PG Bot usa orientações reais dos catálogos, funciona sem cadastro e não envia suas perguntas para uma IA.</p>
+   <div class="hero-actions"><a class="primary-link" href="#assistente">Conversar com o PG Bot <span aria-hidden="true">↘</span></a><a class="secondary-link" href="#como-funciona">Como funciona</a></div>
+   <div class="stats" aria-label="Conteúdo disponível"><div><strong id="arcade-count">150</strong><span>jogos do Arcade</span></div><div><strong id="mission-count">150</strong><span>missões</span></div><div><strong id="original-count">36</strong><span>jogos originais</span></div></div>
+  </div>
+  <div class="hero-visual" aria-hidden="true"><div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div><div class="bot-frame"><span class="visual-label">ASSISTENTE ATIVO</span><img src="./brand/pg-bot/mascot.webp" alt="" width="240" height="270"><span class="visual-footer"><span class="visual-led"></span> PRONTO PARA AJUDAR</span></div><div class="float-chip chip-top">150 × 2</div><div class="float-chip chip-bottom">MISSÃO CONCLUÍDA ✓</div></div>
+ </section>
+ <section id="assistente" class="workspace" aria-labelledby="assistant-title">
+  <div class="workspace-head"><div><div class="eyebrow">01 / ESCOLHA SUA PARTIDA</div><h2 id="assistant-title">Pergunte ao PG Bot</h2><p>O assistente usa o contexto do jogo selecionado para apresentar as instruções certas.</p></div><span class="privacy-label"><span class="status-dot" aria-hidden="true"></span> Respostas locais</span></div>
+  <div class="workspace-grid">
+   <aside class="selector-panel" aria-label="Escolha do jogo">
+    <h3>Onde você está jogando?</h3>
+    <div class="environment-tabs" role="group" aria-label="Selecionar ambiente">
+      <button type="button" id="env-arcade" data-environment="arcade" aria-pressed="true">PG Arcade</button>
+      <button type="button" id="env-estrategia" data-environment="estrategia" aria-pressed="false">PG Estratégia</button>
+    </div>
+    <label class="field-label" for="game-search">Buscar jogo ou missão</label>
+    <input id="game-search" type="search" autocomplete="off" placeholder="Ex.: Snake, Hex, Fortaleza..." maxlength="80">
+    <label class="field-label" for="game-select">Selecione no catálogo</label>
+    <select id="game-select" aria-describedby="game-count" size="6"><option>Carregando catálogo...</option></select>
+    <p id="game-count" class="helper-text" role="status">Lendo títulos disponíveis.</p>
+    <div class="chosen-game"><span class="chosen-tag">JOGO SELECIONADO</span><strong id="game-name">Escolha uma partida</strong><p id="game-description">As orientações aparecem após selecionar um jogo.</p><a id="game-link" href="https://pabloguilherme1121.github.io/PG-Arcade/" target="_blank" rel="noopener noreferrer">Abrir partida <span aria-hidden="true">↗</span></a></div>
+   </aside>
+   <section class="chat-panel" aria-label="Conversa com o PG Bot">
+    <header class="chat-header"><img src="./brand/pg-bot/mascot.webp" width="48" height="54" alt=""><div><strong>PG Bot</strong><span>Assistente contextual · sem IA externa</span></div><span class="chat-live"><span class="status-dot" aria-hidden="true"></span> Local</span></header>
+    <div id="chat-log" class="chat-log" role="log" aria-live="polite" aria-relevant="additions" aria-label="Mensagens do PG Bot"><div class="chat-row bot"><div class="avatar" aria-hidden="true">PG</div><p class="bubble">Escolha um jogo à esquerda. Posso explicar as regras, os controles, estratégias, acessibilidade e como jogar offline.</p></div></div>
+    <div class="quick-area"><span>PERGUNTAS RÁPIDAS</span><div class="quick-topics" role="group" aria-label="Perguntas frequentes"><button type="button" data-question="Como jogar?">Como jogar</button><button type="button" data-question="Quais são os controles?">Controles</button><button type="button" data-question="Me dê uma dica de estratégia">Uma dica</button><button type="button" data-question="Como funciona offline?">Offline</button><button type="button" data-question="Como reiniciar a partida?">Reiniciar</button><button type="button" data-question="Como consultar progresso e recordes?">Recordes</button></div></div>
+    <form id="chat-form" class="chat-form" autocomplete="off"><label for="question">Sua pergunta</label><div class="input-row"><input id="question" name="question" type="search" maxlength="240" placeholder="Ex.: como vencer este jogo?" enterkeyhint="send" required><button type="submit">Enviar <span aria-hidden="true">↗</span></button></div><p class="form-note">Máximo de 240 caracteres. Perguntas não são gravadas nem enviadas a servidores externos.</p></form>
+   </section>
+  </div>
+ </section>
+ <section id="como-funciona" class="how-section" aria-labelledby="how-title"><div class="eyebrow">02 / COMO FUNCIONA</div><h2 id="how-title">Ajuda prática, sem complicar.</h2><div class="feature-grid"><article><span class="feature-number">01</span><h3>Escolha um título real</h3><p>Selecione entre jogos do Arcade, missões e jogos independentes do Estratégia. Sem recomendações inventadas.</p></article><article><span class="feature-number">02</span><h3>Receba orientação</h3><p>Objetivos, controles e dicas baseados nas descrições e instruções do projeto. O PG Bot não joga por você.</p></article><article><span class="feature-number">03</span><h3>Continue sua partida</h3><p>Abra o jogo em uma nova aba. Dentro da arena, o PG Bot pode mostrar dados atualizados daquela partida.</p></article></div></section>
+ <section class="notice" aria-label="Privacidade"><div><span class="notice-icon" aria-hidden="true">◉</span><div><h2>Privacidade por padrão</h2><p>As perguntas são processadas diretamente neste navegador. Este site carrega um catálogo local e não usa serviços de chat externos. Para respostas sobre o placar ou o turno atual, abra o PG Bot dentro da arena.</p></div></div><a href="https://github.com/pabloguilherme1121/PG-Bot">Ver o código <span aria-hidden="true">↗</span></a></section>
+</main>
+<footer class="site-footer"><strong>PG BOT <span>© 2026</span></strong><p>Projeto do ecossistema PG. Sem cadastro ou anúncios no assistente.</p><nav aria-label="Links do rodapé"><a href="https://pabloguilherme1121.github.io/PG-Arcade/">Arcade</a><a href="https://pabloguilherme1121.github.io/PG-Estrategia/">Estratégia</a><a href="https://github.com/pabloguilherme1121/PG-Bot">GitHub</a></nav></footer>
+</div>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
