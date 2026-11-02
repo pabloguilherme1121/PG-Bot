@@ -1,9 +1,23 @@
 // PG Bot independente: somente regras locais, sem token, cookies ou API de conversação.
 export const normalize = text => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 const bounded=text=>typeof text==='string'&&text.length<=240?normalize(text):'';
-export function filterGames(games,environment,search=''){
- const q=normalize(search).slice(0,80);
- return games.filter(g=>g.environment===environment&&(!q||normalize(g.name+' '+g.category+' '+g.id).includes(q)));
+export function filterGames(games,environment,search='',kind='all'){
+ const terms=normalize(search).slice(0,80).split(/\s+/).filter(Boolean);
+ if(!['all','mission','game'].includes(kind))return [];
+ return games.filter(g=>g.environment===environment&&(kind==='all'||g.kind===kind)&&terms.every(term=>normalize(g.name+' '+g.category+' '+g.id).includes(term)));
+}
+export function contextUrl(game){
+ if(!game||!['arcade','estrategia'].includes(game.environment)||typeof game.id!=='string'||!/^[a-z0-9][a-z0-9-]{0,63}$/.test(game.id))return null;
+ const url=new URL('https://pabloguilherme1121.github.io/PG-Bot/');
+ url.searchParams.set('projeto',game.environment);
+ url.searchParams.set('jogo',game.id);
+ return url.href;
+}
+export function suggestGame(games,random=Math.random){
+ if(!Array.isArray(games)||games.length===0)return null;
+ const n=Number(random());
+ const idx=Number.isFinite(n)?Math.min(games.length-1,Math.max(0,Math.floor(n*games.length))):0;
+ return games[idx];
 }
 export function answerQuestion(question,game){
  const q=bounded(question);
@@ -33,7 +47,7 @@ const selectors={
 };
 function initDocument(){
  const $=key=>document.getElementById(selectors[key]||key);
- let games=[],environment='arcade',selected=null;
+ let games=[],environment='arcade',selected=null,kind='all';
  const url=new URL(location.href);
  const requestedEnvironment=url.searchParams.get('projeto');
  const requestedId=url.searchParams.get('jogo');
@@ -61,8 +75,11 @@ function initDocument(){
   history.replaceState(null,'',current.pathname+current.search+current.hash);
  }
  function renderChoices(preferredId=''){
-  const shown=filterGames(games,environment,$('search').value);
+  const shown=filterGames(games,environment,$('search').value,kind);
   const limited=shown.slice(0,80);
+  // IDs recebidos por link devem continuar selecionáveis, mesmo fora das primeiras 80 opções.
+  const preferred=shown.find(g=>g.id===preferredId)||shown.find(g=>g.id===selected?.id);
+  if(preferred&&!limited.some(g=>g.id===preferred.id))limited[Math.min(79,limited.length-1)]=preferred;
   const options=document.createDocumentFragment();
   for(const game of limited){
    const option=document.createElement('option');
@@ -79,7 +96,7 @@ function initDocument(){
   if(next!=='arcade'&&next!=='estrategia')return;
   const changed=environment!==next;environment=next;
   document.querySelectorAll('[data-environment]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.environment===environment)));
-  $('search').value='';selected=null;renderChoices(changed?'':requestedId);
+  $('search').value='';kind='all';$('game-kind').value='all';selected=null;renderChoices(changed?'':requestedId);
   if(changed)addMessage('Catálogo alterado para PG '+(environment==='arcade'?'Arcade':'Estratégia')+'. Selecione o título desejado para receber orientações próprias.');
  }
  function submitQuestion(text){
@@ -93,6 +110,31 @@ function initDocument(){
  }
  document.querySelectorAll('[data-environment]').forEach(button=>button.addEventListener('click',()=>setEnvironment(button.dataset.environment)));
  $('search').addEventListener('input',()=>renderChoices());
+ $('game-kind').addEventListener('change',()=>{kind=$('game-kind').value;renderChoices();});
+ $('random-game').addEventListener('click',()=>{
+  const pool=filterGames(games,environment,$('search').value,kind);
+  const next=suggestGame(pool);
+  if(!next){$('action-status').textContent='Nenhum título disponível com esses filtros.';return;}
+  $('search').value=next.name;
+  renderChoices(next.id);
+  $('action-status').textContent='Sugestão selecionada: '+next.name+'. Abra a partida ou peça uma dica.';
+ });
+ $('share-game').addEventListener('click',async()=>{
+  const link=contextUrl(selected);
+  if(!link){$('action-status').textContent='Escolha um título para compartilhar a ajuda.';return;}
+  try{
+   if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponível');
+   await navigator.clipboard.writeText(link);
+   $('action-status').textContent='Link de ajuda copiado para a área de transferência.';
+  }catch{
+   $('action-status').textContent='Não foi possível copiar automaticamente. Use o endereço desta página para copiar manualmente.';
+  }
+ });
+ $('clear-chat').addEventListener('click',()=>{
+  $('log').replaceChildren();
+  addMessage('Conversa limpa. Selecione um jogo e faça uma nova pergunta.');
+  $('action-status').textContent='Conversa limpa. Nenhuma pergunta foi salva.';
+ });
  $('select').addEventListener('change',()=>setSelected(games.find(g=>g.environment===environment&&g.id===$('select').value)));
  $('form').addEventListener('submit',e=>{e.preventDefault();submitQuestion($('question').value)});
  document.querySelectorAll('[data-question]').forEach(button=>button.addEventListener('click',()=>submitQuestion(button.dataset.question)));

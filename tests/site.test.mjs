@@ -22,3 +22,10 @@ test('service worker não intercepta nem o Arcade nem o Estratégia',()=>{
  handler({request:{method:'GET',mode:'navigate',url:'https://example.test/PG-Bot/'},respondWith(){handled=true}});
  assert.equal(handled,true);
 });
+
+test('nova versão do PWA renova o cache sem excluir caches de outros projetos',()=>{
+ const sw=readFileSync('sw.js','utf8');
+ assert.ok(sw.includes("const CACHE='pg-bot-shell-v2'"));
+ assert.ok(sw.includes("key.startsWith('pg-bot-shell-')"));
+ assert.ok(sw.includes("'./data/games.json'"));
+});
