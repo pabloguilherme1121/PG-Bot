@@ -23,7 +23,7 @@ export function answerQuestion(question,game){
  const q=bounded(question);
  const fallback='Posso explicar o objetivo, os controles, dar uma dica, falar de reinício, modo offline, acessibilidade e recordes. Escolha um assunto ou tente outra pergunta.';
  if(!game||!q||!/[a-z]/.test(q))return {topic:'fallback',answer:fallback};
- if(/turno atual|meu turno|minha situac|meu placar|estado atual|quanto falta|minha partida/.test(q))
+ if(/turno atual|meu turno|minha situac|meu placar|placar atual|pontuacao atual|estado atual|quanto falta|minha partida/.test(q))
   return {topic:'situacao',answer:'Este site não acompanha a partida em tempo real. Abra o jogo pelo link ao lado e consulte o PG Bot dentro da arena para ver turno, progresso e opções disponíveis.'};
  if(/offline|sem internet|sem conexao|sem rede|desconectad/.test(q))
   return {topic:'offline',answer:'O PG Bot pode funcionar offline depois que os arquivos do site forem carregados e guardados pelo navegador. Cada jogo precisa ser visitado conectado para guardar seus próprios arquivos; a primeira visita sem internet pode não funcionar.'};
