@@ -26,6 +26,13 @@ O site é um PWA: depois de uma visita conectada e de armazenar os recursos no n
 - Links diretos para qualquer ID do catálogo, mesmo fora dos primeiros 80 resultados exibidos.
 - Cache PWA v2: invalida somente versões antigas do próprio PG Bot, preservando o cache separado dos jogos.
 
+## Favoritos locais
+
+- Adicione ou remova jogos dos favoritos diretamente no catálogo e filtre para mostrar somente os salvos.
+- Os favoritos usam apenas IDs de títulos existentes, separados por projeto. Não são enviadas perguntas nem informações de progresso.
+- A preferência fica somente neste navegador. Se o armazenamento estiver indisponível, continua funcionando na aba atual, com aviso explícito.
+- A lista armazenada é validada contra os jogos reais na próxima abertura, sem recuperar IDs removidos ou inexistentes.
+
 ## Organização
 
 - `index.html`: navegação, seleção dos catálogos e chat acessível.

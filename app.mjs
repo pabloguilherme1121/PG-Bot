@@ -1,4 +1,5 @@
 // PG Bot independente: somente regras locais, sem token, cookies ou API de conversação.
+import {favoriteKey,loadFavoriteKeys,saveFavoriteKeys,toggleFavoriteKey,favoriteGames} from './favorites.mjs';
 export const normalize = text => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 const bounded=text=>typeof text==='string'&&text.length<=240?normalize(text):'';
 export function filterGames(games,environment,search='',kind='all'){
@@ -72,7 +73,7 @@ const selectors={
 };
 function initDocument(){
  const $=key=>document.getElementById(selectors[key]||key);
- let games=[],environment='arcade',selected=null,kind='all';
+ let games=[],environment='arcade',selected=null,kind='all',favorites=new Set(),favoritesOnly=false;
  const url=new URL(location.href);
  const requestedEnvironment=url.searchParams.get('projeto');
  const requestedId=url.searchParams.get('jogo');
@@ -88,11 +89,15 @@ function initDocument(){
  function setSelected(game){
   selected=game??null;
   $('name').textContent=selected?.name||'Nenhum jogo encontrado';
-  $('description').textContent=selected?.description||'Digite outro termo para buscar um jogo.';
+  $('description').textContent=selected?.description||(favoritesOnly?'Nenhum favorito encontrado com esses filtros. Desative o filtro ou adicione um jogo aos favoritos.':'Digite outro termo para buscar um jogo.');
   const destination=selected?.url||'https://pabloguilherme1121.github.io/PG-Arcade/';
   const u=new URL(destination);
   if(u.hostname==='pabloguilherme1121.github.io'&&(u.pathname.startsWith('/PG-Arcade/')||u.pathname.startsWith('/PG-Estrategia/'))) $('link').href=u.href;
   $('link').hidden=!selected;
+  const isFavorite=!!selected&&favorites.has(favoriteKey(selected));
+  $('favorite-game').disabled=!selected;
+  $('favorite-game').setAttribute('aria-pressed',String(isFavorite));
+  $('favorite-game').textContent=isFavorite?'Remover dos favoritos':'Adicionar aos favoritos';
   const current=new URL(location.href);
   current.searchParams.set('projeto',environment);
   if(selected)current.searchParams.set('jogo',selected.id);
@@ -100,7 +105,8 @@ function initDocument(){
   history.replaceState(null,'',current.pathname+current.search+current.hash);
  }
  function renderChoices(preferredId=''){
-  const shown=filterGames(games,environment,$('search').value,kind);
+  const matches=filterGames(games,environment,$('search').value,kind);
+  const shown=favoritesOnly?favoriteGames(matches,favorites):matches;
   const limited=shown.slice(0,80);
   // IDs recebidos por link devem continuar selecionáveis, mesmo fora das primeiras 80 opções.
   const preferred=shown.find(g=>g.id===preferredId)||shown.find(g=>g.id===selected?.id);
@@ -120,6 +126,7 @@ function initDocument(){
  function setEnvironment(next){
   if(next!=='arcade'&&next!=='estrategia')return;
   const changed=environment!==next;environment=next;
+  if(changed){favoritesOnly=false;$('favorites-only').checked=false;}
   document.querySelectorAll('[data-environment]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.environment===environment)));
   $('search').value='';kind='all';$('game-kind').value='all';selected=null;renderChoices(changed?'':requestedId);
   if(changed)addMessage('Catálogo alterado para PG '+(environment==='arcade'?'Arcade':'Estratégia')+'. Selecione o título desejado para receber orientações próprias.');
@@ -136,6 +143,21 @@ function initDocument(){
  document.querySelectorAll('[data-environment]').forEach(button=>button.addEventListener('click',()=>setEnvironment(button.dataset.environment)));
  $('search').addEventListener('input',()=>renderChoices());
  $('game-kind').addEventListener('change',()=>{kind=$('game-kind').value;renderChoices();});
+ $('favorites-only').addEventListener('change',()=>{
+  favoritesOnly=$('favorites-only').checked;
+  renderChoices();
+  $('action-status').textContent=favoritesOnly?'Exibindo somente favoritos deste projeto.':'Exibindo todos os títulos disponíveis.';
+ });
+ $('favorite-game').addEventListener('click',()=>{
+  if(!selected)return;
+  const current=selected;
+  const wasFavorite=favorites.has(favoriteKey(current));
+  favorites=toggleFavoriteKey(favorites,current);
+  let persisted=false;
+  try{persisted=saveFavoriteKeys(window.localStorage,favorites)}catch{}
+  renderChoices(current.id);
+  $('action-status').textContent=(wasFavorite?'Removido dos favoritos.':'Adicionado aos favoritos.')+(persisted?' Preferência salva neste navegador.':' O navegador não permitiu salvar; favorito disponível somente nesta visita.');
+ });
  $('random-game').addEventListener('click',()=>{
   const pool=filterGames(games,environment,$('search').value,kind);
   const next=suggestGame(pool);
@@ -170,6 +192,7 @@ function initDocument(){
  }).then(data=>{
   if(!data||!Array.isArray(data.games)||data.games.length<300)throw Error('Dados do catálogo incompletos');
   games=data.games;
+  try{favorites=loadFavoriteKeys(window.localStorage,games)}catch{favorites=new Set()}
   $('arcade-count').textContent=String(data.counts.arcade);
   $('mission-count').textContent=String(data.counts.missions);
   $('original-count').textContent=String(data.counts.classic+data.counts.independent);

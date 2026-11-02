@@ -25,7 +25,8 @@ test('service worker não intercepta nem o Arcade nem o Estratégia',()=>{
 
 test('nova versão do PWA renova o cache sem excluir caches de outros projetos',()=>{
  const sw=readFileSync('sw.js','utf8');
- assert.ok(sw.includes("const CACHE='pg-bot-shell-v2'"));
+ assert.ok(sw.includes("const CACHE='pg-bot-shell-v3'"));
+ assert.ok(sw.includes("'./favorites.mjs'"));
  assert.ok(sw.includes("key.startsWith('pg-bot-shell-')"));
  assert.ok(sw.includes("'./data/games.json'"));
 });
