@@ -17,7 +17,7 @@ test.describe('PG Bot: identidade visual da central de automações',()=>{
       overflow:document.documentElement.scrollWidth>innerWidth};
    });
    expect(visual.accent).toBe('#9fe6cd');
-   expect(visual.bodyFont).toContain('Inter');
+   expect(visual.bodyFont).toContain('Manrope');
    expect(await page.locator('#hero-title').evaluate(el=>getComputedStyle(el).fontFamily)).toContain('Space Grotesk');
    expect(await page.locator('.stat-index').first().evaluate(el=>getComputedStyle(el).fontFamily)).toContain('IBM Plex Mono');
    expect(visual.buttonHeight).toBeGreaterThanOrEqual(44);
