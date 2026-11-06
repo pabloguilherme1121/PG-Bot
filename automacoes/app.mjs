@@ -5,16 +5,29 @@ const $=id=>document.getElementById(id);
 const priority={falha:0,indisponivel:1,executando:2,revisao:3,sem_dados:4,ok:5};
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n};
 let report=null;
+let projectFilter='all';
+const filterProject=p=>projectFilter==='all'||(projectFilter==='attention'&&['falha','indisponivel','executando','sem_dados'].includes(p.state))||(projectFilter==='review'&&p.state==='revisao')||(projectFilter==='ok'&&p.state==='ok');
+function updateFilterButtons(){
+ for(const button of document.querySelectorAll('[data-project-filter]')){
+  const selected=button.dataset.projectFilter===projectFilter;
+  button.classList.toggle('is-active',selected);
+  button.setAttribute('aria-pressed',String(selected));
+ }
+}
 function render(){
  const projects=report.projects.slice().sort((a,b)=>(priority[a.state]??9)-(priority[b.state]??9));
+ const visibleProjects=projects.filter(filterProject);
+ updateFilterButtons();
  $('count-projects').textContent=String(projects.length);
  $('count-failures').textContent=String(projects.filter(p=>p.state==='falha').length);
  $('count-prs').textContent=String(projects.reduce((n,p)=>n+p.openPRs.length,0));
  $('count-unavailable').textContent=String(projects.filter(p=>p.state==='indisponivel').length);
  $('overall-state').textContent=projects.some(p=>p.state==='falha')?'Falhas exigem atenção':projects.some(p=>p.state==='indisponivel')?'Dados parciais':'Relatório disponível';
+ document.querySelector('.live').dataset.health=projects.some(p=>p.state==='falha')?'falha':projects.some(p=>p.state==='indisponivel')?'indisponivel':'ok';
  $('last-check').textContent='Verificado em '+new Date(report.generatedAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Sao_Paulo'});
- $('projects').replaceChildren(...projects.map(p=>{
+ $('projects').replaceChildren(...visibleProjects.map(p=>{
   const card=el('article','project'),head=el('div','project-head'),name=el('a','project-name',p.repository.split('/')[1]);
+  card.dataset.state=p.state;
   name.href='https://github.com/'+p.repository;name.rel='noopener noreferrer';name.target='_blank';
   head.append(name,el('span','state state-'+p.state,STATE_LABELS[p.state]));card.append(head);
   card.append(el('p','project-note',p.note));
@@ -25,6 +38,7 @@ function render(){
   if(p.openPRs.length){const a=el('a','run-link','Ver PRs abertas');a.href='https://github.com/'+p.repository+'/pulls';a.rel='noopener noreferrer';a.target='_blank';card.append(a)}
   return card;
  }));
+ if(!visibleProjects.length)$('projects').replaceChildren(el('p','empty-state','Nenhum projeto nesta categoria. Selecione outro filtro.'));
  const actions=planActions(report).slice(0,6);
  $('action-queue').replaceChildren(...actions.map(a=>{
   const card=el('article','action-item'),head=el('div','action-head');
@@ -67,6 +81,9 @@ async function refresh(){
   $('load-status').textContent=reportFreshness(report.generatedAt).status==='desatualizado'?'Relatório desatualizado (mais de 24 horas). Reexecute o monitor; não presuma estado atual.':'Snapshot carregado. Os dados não são uma verificação em tempo real.';
  }catch(error){$('load-status').textContent=error.message+'. Nenhum resultado foi presumido.'}
  finally{$('refresh').disabled=false}
+}
+for(const button of document.querySelectorAll('[data-project-filter]')){
+ button.addEventListener('click',()=>{projectFilter=button.dataset.projectFilter;updateFilterButtons();if(report)render();});
 }
 $('refresh').addEventListener('click',refresh);
 $('ask').addEventListener('submit',e=>{e.preventDefault();const q=$('question').value.trim();if(q){reply(q);$('question').value='';$('question').focus()}});
