@@ -83,8 +83,9 @@ function nextIssuePage(linkHeader,currentUrl){
  if(!match)throw Error('Paginação do GitHub inválida');
  const url=new URL(match[1],currentUrl);
  const expected=new URL(API);
+ const sameRepository=url.pathname===expected.pathname||url.pathname==='/repositories/1442325600/issues';
  const page=Number(url.searchParams.get('page'));
- if(url.origin!==expected.origin||url.pathname!==expected.pathname||url.searchParams.get('state')!=='open'||url.searchParams.get('per_page')!=='100'||!Number.isSafeInteger(page)||page<2){
+ if(url.origin!==expected.origin||!sameRepository||url.searchParams.get('state')!=='open'||url.searchParams.get('per_page')!=='100'||!Number.isSafeInteger(page)||page<2){
   throw Error('Paginação do GitHub inválida');
  }
  return url.href;
