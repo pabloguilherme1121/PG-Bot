@@ -157,6 +157,12 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .live-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; color: #c0cde2; font: 500 11px/1.5 var(--font-mono); }
 .mini-dot { display: inline-block; flex: 0 0 7px; width: 7px; height: 7px; border-radius: 100%; background: var(--mint); }
 .live-foot-sep { color: #7184a5; }
+.live[data-health="falha"] { border-color: #78506b; }
+.live[data-health="falha"] .mini-dot { background: var(--danger); }
+.live[data-health="indisponivel"] { border-color: #776650; }
+.live[data-health="indisponivel"] .mini-dot { background: var(--amber); }
+.live[data-health="ok"] .mini-dot { background: var(--success); }
+
 
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .stat {
