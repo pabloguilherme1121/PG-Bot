@@ -87,7 +87,17 @@ export function parseReport(body){
  try{
   const data=JSON.parse(match[1]);
   if(data?.version!==1||!Number.isFinite(Date.parse(data.generatedAt))||!Array.isArray(data.projects))return null;
-  if(data.projects.some(p=>!p||!MONITORED_REPOS.includes(p.repository)||!Object.hasOwn(STATE_LABELS,p.state)))return null;
+  if(data.projects.length>MONITORED_REPOS.length)return null;
+  if(data.projects.some(p=>{
+   if(!p||!MONITORED_REPOS.includes(p.repository)||!Object.hasOwn(STATE_LABELS,p.state))return true;
+   if(typeof p.note!=='string'||!Array.isArray(p.workflows)||!Array.isArray(p.openPRs)||p.workflows.length>12||p.openPRs.length>15)return true;
+   const base='https://github.com/'+p.repository;
+   if(p.workflows.some(w=>!w||!Number.isSafeInteger(w.id)||w.id<0||
+    w.url!==(w.id?base+'/actions/runs/'+w.id:base+'/actions')))return true;
+   if(p.openPRs.some(pr=>!pr||!Number.isSafeInteger(pr.number)||pr.number<1||
+    pr.url!==base+'/pull/'+pr.number))return true;
+   return false;
+  }))return null;
   return data;
  }catch{return null}
 }

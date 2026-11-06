@@ -16,3 +16,12 @@ for(const width of [320,390]){
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  });
 }
+
+test('sem issue de relatório, não inventa estados de projeto',async({page})=>{
+ await page.route(api,route=>route.fulfill({status:200,contentType:'application/json',body:'[]'}));
+ await page.goto('./automacoes/');
+ await expect(page.locator('#load-status')).toContainText('não publicado');
+ await page.getByRole('button',{name:'Falhas'}).click();
+ await expect(page.locator('#messages .message').last()).toContainText('Não há relatório');
+ await expect(page.locator('#count-failures')).toHaveText('0');
+});

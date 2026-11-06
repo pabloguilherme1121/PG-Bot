@@ -72,3 +72,13 @@ test('relatório sem bloco verificável é rejeitado',()=>{
  assert.equal(parseReport('Acompanhe seus projetos.'),null);
  assert.equal(parseReport('<!-- pg-bot-automation:v1\n{}\n-->'),null);
 });
+
+test('parser recusa dados incompletos ou URLs injetadas no relatório',()=>{
+ const summary=summarizeProject(repo,[run(50,'success')],[pr(5)]);
+ const sample={version:1,generatedAt:'2026-11-05T21:00:00.000Z',projects:[summary]};
+ const withData=data=>'<!-- pg-bot-automation:v1\n'+JSON.stringify(data)+'\n-->';
+ assert.ok(parseReport(withData(sample)));
+ assert.equal(parseReport(withData({...sample,projects:[{...summary,workflows:null}]})),null);
+ const malicious={...summary,workflows:[{...summary.workflows[0],url:'javascript:alert(1)'}]};
+ assert.equal(parseReport(withData({...sample,projects:[malicious]})),null);
+});
