@@ -3,6 +3,9 @@ export const PAGE_SIZE = 6;
 export const QUESTIONS = [
   ['funcoes','O que este projeto faz?'],
   ['repositorio','Onde está o repositório?'],
+  ['arquitetura','Qual é a arquitetura documentada?'],
+  ['testes','Quais validações existem?'],
+  ['integracao','Como integrar com segurança?'],
   ['documentacao','O que diz a documentação?'],
   ['prs','Quais são as PRs recentes?'],
   ['ci','Como estão os checks de CI?'],
@@ -87,6 +90,8 @@ export function describeQuestion(topic, repo, context) {
   const runs = context?.runs?.data;
   const source = section => ({
     url:section === 'readme' ? repo.url + '/blob/' + encodeURIComponent(repo.defaultBranch) + '/README.md'
+      : section === 'package' ? repo.url + '/blob/' + encodeURIComponent(repo.defaultBranch) + '/package.json'
+      : section === 'workflows' ? repo.url + '/tree/' + encodeURIComponent(repo.defaultBranch) + '/.github/workflows'
       : section === 'pulls' ? repo.url + '/pulls'
       : section === 'runs' ? repo.url + '/actions'
       : repo.url,
@@ -102,6 +107,26 @@ export function describeQuestion(topic, repo, context) {
       return {answer:readme ? 'Trecho do README: ' + excerptMarkdown(readme,700) : 'README indisponível nesta consulta.',...source('readme')};
     case 'repositorio':
       return {answer:'Repositório público: ' + repo.fullName + '. Linguagem indicada pelo GitHub: ' + (repo.language || 'não informada') + '.',...source('repo')};
+    case 'arquitetura': {
+      const pkg=context?.package?.data;
+      const libs=pkg?.dependencies || [];
+      const tools=pkg?.devDependencies || [];
+      const details=pkg ? 'package.json: '+(pkg.name||'sem nome')+'. Dependências declaradas: '+([ ...libs,...tools].slice(0,18).join(', ') || 'nenhuma') : '';
+      return {answer:pkg ? details+'. Isso descreve dependências, não confirma toda a arquitetura.' : 'Sem package.json acessível. A arquitetura precisa de revisão da documentação e dos arquivos do repositório.',...source('package')};
+    }
+    case 'testes': {
+      const pkg=context?.package?.data;
+      const workflows=context?.workflows?.data;
+      const scripts=pkg?.scripts||[];
+      const parts=[];
+      if(scripts.length)parts.push('Scripts declarados: '+scripts.join(', '));
+      if(Array.isArray(workflows) && workflows.length)parts.push('Workflows encontrados: '+workflows.join(', '));
+      const proof=context?.runs?.data;
+      if(!parts.length)return {answer:'Scripts e workflows não encontrados ou indisponíveis. Não é possível confirmar testes.',...source('workflows')};
+      return {answer:parts.join('; ')+'. A existência desses arquivos não comprova que os testes passaram. Consulte as execuções de CI para verificar SHA e conclusão.',...source(Array.isArray(workflows)&&workflows.length?'workflows':'package')};
+    }
+    case 'integracao':
+      return {answer:'Não há integração automática confirmada. Verifique a documentação pública, identifique o ponto de montagem e escolha um adaptador isolado para este projeto. Preserve IDs, contratos e armazenamento. No Cuidador(a), mantenha somente ajuda documental pública.',...source('readme')};
     case 'prs': {
       const txt=Array.isArray(pulls) ? pulls.slice(0,5).map(p=>'#'+p.number+' '+p.title+' ('+(p.merged_at?'mesclada':p.state==='open'?'aberta':'fechada sem merge confirmado')+')').join('; ') : '';
       return {answer:txt || 'PRs públicas não disponíveis nesta consulta.',...source('pulls')};
