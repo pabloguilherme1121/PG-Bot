@@ -54,7 +54,7 @@ function cleanRuns(data) {
 }
 function readBase64Json(file) {
   if(typeof file?.content !== 'string' || file.content.length > 100000) throw Error('Manifesto inválido');
-  const bytes=Uint8Array.from(atob(file.content.replace(/\\s/g,'')),char=>char.charCodeAt(0));
+  const bytes=Uint8Array.from(atob(file.content.replace(/\s/g,'')),char=>char.charCodeAt(0));
   const obj=JSON.parse(new TextDecoder().decode(bytes));
   if(!obj || typeof obj !== 'object') throw Error('Manifesto inválido');
   const dependencies=Object.keys(obj.dependencies||{}).slice(0,30);
@@ -64,7 +64,7 @@ function readBase64Json(file) {
 }
 function cleanWorkflows(rows) {
   if(!Array.isArray(rows)) throw Error('Workflows não disponíveis');
-  return rows.filter(x=>/\\.ya?ml$/.test(x.name||'')).map(x=>String(x.name).slice(0,100)).slice(0,20);
+  return rows.filter(x=>/\.ya?ml$/.test(x.name||'')).map(x=>String(x.name).slice(0,100)).slice(0,20);
 }
 function storedContext(repoName) {
   const old=read('context:'+repoName);
@@ -73,7 +73,7 @@ function storedContext(repoName) {
 }
 export async function fetchContext(repo,force=false) {
   const old=storedContext(repo.name);
-  const recent=old && ['readme','pulls','runs'].every(k=>old[k]?.fetchedAt && Date.now()-Date.parse(old[k].fetchedAt)<TTL);
+  const recent=old && ['readme','pulls','runs','package','workflows'].every(k=>old[k]?.fetchedAt && Date.now()-Date.parse(old[k].fetchedAt)<TTL);
   if(!force && recent) return old;
   const name=encodeURIComponent(repo.name);
   const tasks={
