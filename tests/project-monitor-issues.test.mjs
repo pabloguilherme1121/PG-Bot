@@ -44,3 +44,16 @@ test('se exceder cinco paginas, falha em vez de arriscar uma issue duplicada',as
  );
  assert.equal(calls,5);
 });
+
+test('aceita link canônico com ID numérico do mesmo repositório',async()=>{
+ const seen=[];
+ const issue={number:99,title:reportTitle,body:'Verificado'};
+ const canonical='<https://api.github.com/repositories/1442325600/issues?state=open&per_page=100&page=2>; rel="next"';
+ const result=await findOpenReportIssue(async path=>{
+  seen.push(path);
+  return path.startsWith('/repositories/')?{items:[issue],link:null}:{items:[],link:canonical};
+ },base,reportTitle);
+ assert.equal(result.number,99);
+ assert.equal(seen.length,2);
+ assert.match(seen[1],/^\/repositories\/1442325600\/issues/);
+});
