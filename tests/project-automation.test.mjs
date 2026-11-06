@@ -18,6 +18,8 @@ test('monitor recebe somente repositórios configurados e identificados',()=>{
  assert.ok(MONITORED_REPOS.includes('pabloguilherme1121/PG-Arcade'));
  assert.ok(MONITORED_REPOS.includes('pabloguilherme1121/PG-Estrategia'));
  assert.ok(MONITORED_REPOS.includes('pabloguilherme1121/PG-portfolio'));
+ assert.ok(MONITORED_REPOS.includes('Pabloguilherme01/Cuidador'));
+ assert.ok(!MONITORED_REPOS.includes('pabloguilherme1121/pg-tech-storefront'), 'Não publicar nome ou status do repositório privado');
  assert.equal(new Set(MONITORED_REPOS).size,MONITORED_REPOS.length);
  for(const name of MONITORED_REPOS)assert.match(name,/^[a-zA-Z0-9-]+\/[a-zA-Z0-9._-]+$/);
 });
