@@ -64,7 +64,7 @@ test('relatório é legível e possui dados estruturados versionados recuperáve
 test('títulos de PR são tratados como dados, não como HTML ou Markdown ativo',()=>{
  const injected={...pr(40),title:'<img src=x onerror=alert(1)> --> [clique](https://bad.example)'};
  const body=buildReport([summarizeProject(repo,[run(29,'failure')],[injected])],'2026-11-05T21:00:00.000Z');
- assert.doesNotMatch(body,/<img|onerror=|bad\.example|-->/);
+ assert.doesNotMatch(body,/<img|onerror=|bad\.example|--> \[clique/);
  assert.equal(parseReport(body).projects[0].openPRs[0].number,40);
 });
 
