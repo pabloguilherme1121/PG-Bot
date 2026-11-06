@@ -37,6 +37,7 @@ test('recusa repositório fora do escopo conhecido',()=>{
  const actions=planActions({projects:[project('PG-Bot','ok'),{repository:'thirdparty/secrets',state:'falha',workflows:[],openPRs:[]}]});
  assert.equal(actions.length,1);
  assert.equal(actions[0].repository,'pabloguilherme1121/PG-Bot');
+ assert.equal(planActions({projects:[{repository:'Pabloguilherme01/Cuidador',state:'ok',workflows:[],openPRs:[]} ]})[0].project,'Cuidador');
 });
 
 test('relatório antigo ou futuro não é apresentado como atual',()=>{
