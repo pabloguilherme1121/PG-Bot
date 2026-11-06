@@ -52,7 +52,7 @@ function renderRepos() {
 }
 function contextStatus() {
   if(!state.context)return 'O contexto ainda não foi consultado.';
-  const names={readme:'README',pulls:'PRs',runs:'CI'};
+  const names={readme:'README',pulls:'PRs',runs:'CI',package:'Arquitetura',workflows:'Workflows'};
   return Object.entries(names).map(([key,name])=>{
     const info=state.context[key];
     return name+': '+(info?.stale?'antigo/indisponível':'consultado')+' · '+date(info?.fetchedAt);
