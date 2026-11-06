@@ -73,7 +73,7 @@ function storedContext(repoName) {
 }
 export async function fetchContext(repo,force=false) {
   const old=storedContext(repo.name);
-  const recent=old && ['readme','pulls','runs','package','workflows'].every(k=>old[k]?.fetchedAt && Date.now()-Date.parse(old[k].fetchedAt)<TTL);
+  const recent=old && ['readme','pulls','runs','package','workflows'].every(k=>{const t=old[k]?.checkedAt||old[k]?.fetchedAt;return t && Date.now()-Date.parse(t)<TTL;});
   if(!force && recent) return old;
   const name=encodeURIComponent(repo.name);
   const tasks={
@@ -88,9 +88,9 @@ export async function fetchContext(repo,force=false) {
   async function worker(){
     while(cursor<list.length){
       const [key,request]=list[cursor++];
-      try {entries.push([key,{data:await request(),fetchedAt:new Date().toISOString(),stale:false}]);}
+      try {entries.push([key,{data:await request(),fetchedAt:new Date().toISOString(),checkedAt:new Date().toISOString(),stale:false}]);}
       catch(error){
-        entries.push([key,{data:old?.[key]?.data??null,fetchedAt:old?.[key]?.fetchedAt||null,stale:true,error:String(error.message)}]);
+        entries.push([key,{data:old?.[key]?.data??null,fetchedAt:old?.[key]?.fetchedAt||null,checkedAt:new Date().toISOString(),stale:true,error:String(error.message)}]);
       }
     }
   }
