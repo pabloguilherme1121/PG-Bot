@@ -7,3 +7,14 @@
 @media(max-width:900px){.hero,.assistant-layout{grid-template-columns:1fr}.hero{padding:45px 0 30px}.live{min-height:160px}.projects{grid-template-columns:repeat(2,minmax(0,1fr))}.assistant-layout{padding-top:55px}}
 @media(max-width:560px){.top nav{width:100%;justify-content:space-between;gap:8px}.top nav a{font-size:11px}.hero h1{font-size:clamp(36px,10vw,52px)}.lead{font-size:14px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats div{padding:15px}.stats strong{font-size:26px}.projects{grid-template-columns:1fr}.project-note{min-height:0}.section-head{display:block}.ask-row{flex-wrap:wrap}.ask-row input,.ask-row button{flex:1 1 100%}.actions button,.actions a{flex:1 1 140px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Fila de triagem consultiva. Links levam às evidências, sem executar ações. */
+.action-queue{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.action-item{background:var(--panel);border:1px solid var(--stroke);border-radius:15px;padding:18px;min-width:0}
+.action-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.action-priority{border-radius:7px;padding:3px 8px;font-weight:800;color:#1c2630;background:#b9ccd4}
+.action-priority.p0{background:#ffb3ad}.action-priority.p1{background:#f7d8a3}.action-priority.p2{background:#b8ef91}
+.action-item h3{font-size:17px;line-height:1.25;margin:13px 0 8px}
+.action-item p{font-size:13px;color:var(--muted);margin:0 0 13px}
+.action-item a{color:var(--blue);font-size:13px;font-weight:750;display:inline-flex;align-items:center;min-height:44px}
+@media(max-width:650px){.action-queue{grid-template-columns:1fr}.action-item{padding:15px}}
