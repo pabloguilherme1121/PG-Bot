@@ -96,3 +96,19 @@ test('acha relatório na segunda página sem fingir ausência de dados',async({p
  await expect(page.locator('#load-status')).toContainText('Snapshot carregado');
  expect(requests).toBe(2);
 });
+
+test('segue URL canônica por ID numérico ao localizar relatório na segunda página',async({page})=>{
+ const canonical='https://api.github.com/repositories/1442325600/issues?state=open&per_page=100&page=2';
+ await page.route(api,route=>route.fulfill({
+  status:200,contentType:'application/json',body:'[]',
+  headers:{link:'<'+canonical+'>; rel="next"',
+   'access-control-allow-origin':'*','access-control-expose-headers':'Link'}
+ }));
+ await page.route('https://api.github.com/repositories/1442325600/issues?*',route=>route.fulfill({
+  status:200,contentType:'application/json',body:mockIssue(),
+  headers:{'access-control-allow-origin':'*'}
+ }));
+ await page.goto('./automacoes/');
+ await expect(page.locator('#projects .project')).toHaveCount(3);
+ await expect(page.locator('#load-status')).toContainText('Snapshot carregado');
+});
