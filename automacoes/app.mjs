@@ -13,8 +13,7 @@ const filterProject=p=>{
  return stateMatch&&(!projectQuery||norm(p.repository.split('/')[1]).includes(norm(projectQuery)));
 };
 function updateFilterButtons(){
- $('project-search').addEventListener('input',event=>{projectQuery=event.target.value.trim();if(report)render();});
-for(const button of document.querySelectorAll('[data-project-filter]')){
+ for(const button of document.querySelectorAll('[data-project-filter]')){
   const selected=button.dataset.projectFilter===projectFilter;
   button.classList.toggle('is-active',selected);
   button.setAttribute('aria-pressed',String(selected));
@@ -75,14 +74,42 @@ function answer(text){
  return 'Resumo de '+new Date(report.generatedAt).toLocaleDateString('pt-BR')+': '+projects.length+' projetos, '+projects.filter(p=>p.state==='falha').length+' falhas de CI e '+projects.filter(p=>p.state==='indisponivel').length+' consultas indisponíveis. Pergunte por falhas, PRs, prioridades ou um projeto.';
 }
 function reply(q){const log=$('messages');const prefix=latestFetchFailed&&report?'Resposta baseada no relatório anterior, não atualizado. ':'';log.append(el('p','message user',q),el('p','message',prefix+answer(q)));log.scrollTop=log.scrollHeight}
+
+const MAX_ISSUE_PAGES=5;
+function nextIssuePage(linkHeader,currentUrl){
+ const next=String(linkHeader||'').split(',').map(item=>item.trim()).find(item=>/;\s*rel="next"(?:\s*;|$)/.test(item));
+ if(!next)return null;
+ const match=next.match(/^<([^>]+)>/);
+ if(!match)throw Error('Paginação do GitHub inválida');
+ const url=new URL(match[1],currentUrl);
+ const expected=new URL(API);
+ const page=Number(url.searchParams.get('page'));
+ if(url.origin!==expected.origin||url.pathname!==expected.pathname||url.searchParams.get('state')!=='open'||url.searchParams.get('per_page')!=='100'||!Number.isSafeInteger(page)||page<2){
+  throw Error('Paginação do GitHub inválida');
+ }
+ return url.href;
+}
+async function fetchReportIssue(){
+ let url=API;
+ const visited=new Set();
+ for(let i=0;i<MAX_ISSUE_PAGES&&url;i++){
+  if(visited.has(url))throw Error('Paginação repetida do GitHub');
+  visited.add(url);
+  const res=await fetch(url,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});
+  if(!res.ok)throw Error('GitHub HTTP '+res.status);
+  const issues=await res.json();
+  if(!Array.isArray(issues))throw Error('Lista de issues do GitHub inválida');
+  const found=issues.find(issue=>!issue.pull_request&&issue.title===REPORT_TITLE);
+  if(found)return found;
+  url=nextIssuePage(res.headers.get('link'),url);
+ }
+ throw Error('Relatório ainda não publicado ou fora das primeiras '+MAX_ISSUE_PAGES+' páginas');
+}
 async function refresh(){
  $('refresh').disabled=true;$('load-status').textContent='Consultando GitHub...';
  try{
-  const res=await fetch(API,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});
-  if(!res.ok)throw Error('GitHub HTTP '+res.status);
-  const issues=await res.json();
-  const issue=issues.find(x=>!x.pull_request&&x.title===REPORT_TITLE);
-  const data=issue&&parseReport(issue.body);
+  const issue=await fetchReportIssue();
+  const data=parseReport(issue.body);
   if(!data)throw Error('Relatório ainda não publicado ou inválido');
   if(reportFreshness(data.generatedAt).status==='invalido')throw Error('Data do relatório inválida');
   report=data;latestFetchFailed=false;render();
@@ -96,6 +123,7 @@ async function refresh(){
  }
  finally{$('refresh').disabled=false}
 }
+$('project-search').addEventListener('input',event=>{projectQuery=event.target.value.trim();if(report)render();});
 for(const button of document.querySelectorAll('[data-project-filter]')){
  button.addEventListener('click',()=>{projectFilter=button.dataset.projectFilter;updateFilterButtons();if(report)render();});
 }
