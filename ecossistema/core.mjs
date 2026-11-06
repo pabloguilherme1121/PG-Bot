@@ -90,8 +90,8 @@ export function describeQuestion(topic, repo, context) {
       : section === 'pulls' ? repo.url + '/pulls'
       : section === 'runs' ? repo.url + '/actions'
       : repo.url,
-    fetchedAt:context?.[section]?.fetchedAt || null,
-    stale:context?.[section]?.stale ?? true
+    fetchedAt:section === 'repo' ? repo.catalogFetchedAt || null : context?.[section]?.fetchedAt || null,
+    stale:section === 'repo' ? Boolean(repo.catalogStale) : context?.[section]?.stale ?? true
   });
   switch(topic) {
     case 'funcoes': {
