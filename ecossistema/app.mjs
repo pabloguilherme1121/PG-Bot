@@ -51,12 +51,18 @@ function renderRepos() {
   $('repo-list').replaceChildren(frag);
 }
 function contextStatus() {
-  if(!state.context)return 'O contexto ainda não foi consultado.';
+  if(!state.context)return document.createTextNode('O contexto ainda não foi consultado.');
   const names={readme:'README',pulls:'PRs',runs:'CI',package:'Arquitetura',workflows:'Workflows'};
-  return Object.entries(names).map(([key,name])=>{
+  const fragment=document.createDocumentFragment();
+  for(const [key,name] of Object.entries(names)){
     const info=state.context[key];
-    return name+': '+(info?.stale?'antigo/indisponível':'consultado')+' · '+date(info?.fetchedAt);
-  }).join(' | ');
+    const status=info?.stale?'Antigo ou indisponível':'Consultado';
+    const chip=document.createElement('span');
+    chip.className='source-item '+(info?.stale?'stale':'fresh');
+    chip.append(text('strong',name+' · '+status),text('small','Consulta: '+date(info?.fetchedAt)));
+    fragment.append(chip);
+  }
+  return fragment;
 }
 function renderDetail() {
   const repo=state.selected;
@@ -71,7 +77,7 @@ function renderDetail() {
     if(home)dest.append(home);
   }
   $('detail-links').replaceChildren(dest);
-  $('context-status').textContent=contextStatus();
+  $('context-status').replaceChildren(contextStatus());
   $('suggest').disabled=!repo;
   const questions=document.createDocumentFragment();
   for(const [topic,label] of QUESTIONS){
@@ -199,7 +205,8 @@ function exportQueue() {
 if(new URL(location.href).searchParams.get('embed')==='1') {
   document.body.classList.add('embed');
   const close=text('button','Fechar assistente');close.type='button';close.className='button subtle';
-  close.addEventListener('click',()=>window.parent.postMessage({type:'pgbot-ecosystem-close'},'*'));
+  const token=new URL(location.href).searchParams.get('embed-token');
+  close.addEventListener('click',()=>window.parent.postMessage({type:'pgbot-ecosystem-close',token},'*'));
   document.querySelector('.intro-actions').append(close);
 }
 state.queue=readQueue();renderQueue();

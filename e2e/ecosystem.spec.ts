@@ -26,6 +26,7 @@ test.describe('PG Bot | ecossistema público',()=>{
       await page.goto('ecossistema/');
       await expect(page.getByRole('heading',{name:'Projetos públicos'})).toBeVisible();
       await expect(page.locator('#repo-total')).toHaveText('8');
+      await expect(page.locator('#context-status .source-item')).toHaveCount(5);
       await expect(page.locator('#page-info')).toHaveText('Página 1 de 2');
       expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
       await page.locator('#next').click();
