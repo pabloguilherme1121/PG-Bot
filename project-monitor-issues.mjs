@@ -10,8 +10,9 @@ function nextPagePath(link,basePath){
  let url;
  try{url=new URL(match[1]);}catch{throw Error('Paginação inválida: URL incorreta');}
  const expected=new URL(basePath,API_ORIGIN);
+ const sameRepository=url.pathname===expected.pathname||url.pathname==='/repositories/1442325600/issues';
  const page=Number(url.searchParams.get('page'));
- if(url.origin!==API_ORIGIN||url.pathname!==expected.pathname||
+ if(url.origin!==API_ORIGIN||!sameRepository||
     url.searchParams.get('state')!=='open'||url.searchParams.get('per_page')!=='100'||
     !Number.isSafeInteger(page)||page<2){
   throw Error('Paginação inválida: escopo diferente');
