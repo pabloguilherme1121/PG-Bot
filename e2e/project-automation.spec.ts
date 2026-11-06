@@ -10,6 +10,9 @@ for(const width of [320,390]){
   await page.route(api,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{title:'PG Bot | Monitoramento dos projetos',body:'<!-- pg-bot-automation:v1\n'+JSON.stringify(data)+'\n-->'}])}));
   await page.goto('./automacoes/');
   await expect(page.locator('#count-failures')).toHaveText('1');
+  await expect(page.locator('#action-queue .action-item')).toHaveCount(1);
+  await expect(page.locator('#action-queue')).toContainText('Investigar falha de CI');
+  await expect(page.locator('#action-queue a')).toHaveAttribute('href','https://github.com/pabloguilherme1121/PG-Arcade/actions/runs/123');
   await expect(page.getByRole('link',{name:'Ver falha: WebKit'})).toHaveAttribute('href',/actions\/runs\/123/);
   await page.getByRole('button',{name:'Prioridades'}).click();
   await expect(page.locator('#messages .message').last()).toContainText('PG-Arcade');
@@ -24,4 +27,15 @@ test('sem issue de relatório, não inventa estados de projeto',async({page})=>{
  await page.getByRole('button',{name:'Falhas'}).click();
  await expect(page.locator('#messages .message').last()).toContainText('Não há relatório');
  await expect(page.locator('#count-failures')).toHaveText('0');
+});
+
+test('relatório com mais de 24 horas exibe aviso e não sugere dado atual',async({page})=>{
+ const data={version:1,generatedAt:'2020-01-01T12:00:00.000Z',projects:[{
+  repository:'pabloguilherme1121/PG-Bot',state:'ok',note:'CI anterior',
+  openPRs:[],workflows:[{id:123,name:'Qualidade',status:'completed',conclusion:'success',url:'https://github.com/pabloguilherme1121/PG-Bot/actions/runs/123'}]
+ }]};
+ await page.route(api,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{title:'PG Bot | Monitoramento dos projetos',body:'<!-- pg-bot-automation:v1\n'+JSON.stringify(data)+'\n-->'}])}));
+ await page.goto('./automacoes/');
+ await expect(page.locator('#overall-state')).toContainText('desatualizado');
+ await expect(page.locator('#load-status')).toContainText('mais de 24 horas');
 });
