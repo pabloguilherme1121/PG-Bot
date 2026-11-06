@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+ <meta charset="utf-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+ <meta name="theme-color" content="#0b101b" />
+ <meta name="description" content="Painel de qualidade, PRs, integrações e evidências do PG Bot no PG Estratégia e PGA Arcade." />
+ <title>PG Bot | Control Center</title>
+ <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+ <div class="app-shell">
+  <aside class="sidebar" aria-label="Navegação principal">
+   <a class="brand" href="#visao" aria-label="PG Bot Control Center: início">
+     <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 40 40" width="36" height="36" fill="none"><rect x="6" y="10" width="28" height="24" rx="9" stroke="currentColor" stroke-width="2"/><path d="M20 5v5M15 22h.01M25 22h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M15 28c3 2 7 2 10 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+     <span><strong>PG<span class="brand-accent">Bot</span></strong><small>CONTROL CENTER <span class="version">v1.0</span></small></span>
+   </a>
+   <div class="sidebar-label">WORKSPACE</div>
+   <nav class="side-nav" id="side-nav">
+    <button class="nav-link active" data-view="visao"><span class="nav-symbol">▦</span>Visão geral</button>
+    <button class="nav-link" data-view="integracoes"><span class="nav-symbol">⌘</span>Integrações</button>
+    <button class="nav-link" data-view="qualidade"><span class="nav-symbol">◈</span>Qualidade e testes</button>
+    <button class="nav-link" data-view="prs"><span class="nav-symbol">⑂</span>Pull requests</button>
+    <button class="nav-link" data-view="evidencias"><span class="nav-symbol">▤</span>Evidências</button>
+    <button class="nav-link" data-view="fila"><span class="nav-symbol">☷</span>Próximas ações</button>
+   </nav>
+   <div class="sidebar-bottom">
+    <div class="context-box"><div class="context-dot"></div><span><strong>Modo auditoria</strong><small>Dados salvos neste navegador</small></span></div>
+    <div class="shortcut-label">REPOSITÓRIOS</div>
+    <a href="https://github.com/pabloguilherme1121/PG-Bot" target="_blank" rel="noopener noreferrer">PG Bot <span>↗</span></a>
+    <a href="https://github.com/pabloguilherme1121/PG-Estrategia" target="_blank" rel="noopener noreferrer">PG Estratégia <span>↗</span></a>
+    <a href="https://github.com/pabloguilherme1121/PG-Arcade" target="_blank" rel="noopener noreferrer">PGA Arcade <span>↗</span></a>
+   </div>
+  </aside>
+  <div class="main-shell">
+   <header class="topbar">
+    <div class="crumb"><span class="crumb-muted">PG Ecosystem</span><span class="crumb-slash">/</span><strong id="crumb-name">Visão geral</strong></div>
+    <div class="top-actions"><span class="sync-state" id="sync-state" role="status">● Snapshot registrado</span><button type="button" class="icon-button" id="export-btn" title="Exportar registros em JSON" aria-label="Exportar registros em JSON">⇩</button><button class="btn btn-primary btn-sync" type="button" id="sync-btn"><span aria-hidden="true">⟳</span> <span>Consultar GitHub</span></button></div>
+   </header>
+   <main class="content" id="content">
+    <section class="page-head">
+     <div><div class="eyebrow"><span class="eyebrow-square"></span> CENTRAL DE OPERAÇÕES · PG BOT</div><h1 id="page-title">Qualidade que pode ser comprovada<span class="title-point">.</span></h1><p id="page-subtitle">Acompanhe integrações, contratos, evidências e critérios de aceite. A meta de 100% depende de testes reais, não apenas de PRs mescladas.</p></div>
+     <div class="page-head-tools"><button class="btn btn-ghost" type="button" id="import-btn">Importar JSON</button><button class="btn btn-ghost" type="button" id="reset-btn">Restaurar snapshot</button></div>
+    </section>
+    <div class="toolbar">
+     <div class="project-switch" id="project-switch" role="group" aria-label="Filtrar por projeto"><button type="button" data-project="all" class="selected">Todos</button><button type="button" data-project="estrategia">PG Estratégia</button><button type="button" data-project="arcade">PGA Arcade</button></div>
+     <div class="searchbox"><span aria-hidden="true">⌕</span><label class="sr-only" for="search">Pesquisar registros</label><input id="search" type="search" placeholder="Pesquisar neste painel..." autocomplete="off" /></div>
+    </div>
+    <div id="view-content" aria-live="polite"></div>
+    <footer class="page-footer"><span>PG BOT / QUALITY OBSERVABILITY</span><span>Links e status do GitHub são consultados apenas quando você clica em “Consultar GitHub”.</span></footer>
+   </main>
+  </div>
+ </div>
+ <dialog id="record-modal" aria-labelledby="modal-title"><form id="modal-form"><div class="modal-head"><div><div class="eyebrow">REGISTRO</div><h2 id="modal-title">Editar</h2></div><button type="button" id="close-modal" class="close-btn" aria-label="Fechar">✕</button></div><div id="modal-fields"></div><div class="modal-actions"><button type="button" id="cancel-modal" class="btn btn-ghost">Cancelar</button><button type="submit" class="btn btn-primary">Salvar registro</button></div></form></dialog>
+ <input type="file" id="file-input" accept="application/json,.json" hidden />
+ <div id="toast" class="toast" role="status" aria-live="polite"></div>
+ <script type="module" src="./app.mjs"></script>
+</body>
+</html>
