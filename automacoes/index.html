@@ -25,9 +25,13 @@
 <div><span>Indisponíveis</span><strong id="count-unavailable">0</strong></div>
 </section>
 <p id="load-status" class="note" role="status" aria-live="polite">Consultando relatório público.</p>
-<section aria-labelledby="projects-title"><div class="section-head"><div><p class="eyebrow">01 / EVIDÊNCIAS</p><h2 id="projects-title">Estado dos projetos</h2></div><p>A última CI observada não comprova publicação.</p></div>
+<section class="triage" aria-labelledby="triage-title">
+ <div class="section-head"><div><p class="eyebrow">01 / PRÓXIMAS AÇÕES</p><h2 id="triage-title">Fila de triagem</h2></div><p>Prioridades calculadas a partir do relatório. Cada ação exige revisão antes de executar.</p></div>
+ <div id="action-queue" class="action-queue" aria-live="polite"><p class="note">Aguardando evidências para organizar as ações.</p></div>
+</section>
+<section aria-labelledby="projects-title"><div class="section-head"><div><p class="eyebrow">02 / EVIDÊNCIAS</p><h2 id="projects-title">Estado dos projetos</h2></div><p>A última CI observada não comprova publicação.</p></div>
 <div id="projects" class="projects"><p class="note">Aguardando relatório verificado.</p></div></section>
-<section class="assistant-layout"><div><p class="eyebrow">02 / ASSISTENTE</p><h2>Consulte o PG Bot</h2>
+<section class="assistant-layout"><div><p class="eyebrow">03 / ASSISTENTE</p><h2>Consulte o PG Bot</h2>
 <p class="note">Pergunte sobre falhas, PRs, prioridades ou sobre um projeto específico. As respostas são geradas por regras locais sobre o último relatório, sem IA externa.</p>
 <div class="quick" role="group" aria-label="Consultas rápidas">
 <button data-prompt="Quais projetos falharam?" type="button">Falhas</button><button data-prompt="O que revisar primeiro?" type="button">Prioridades</button>
