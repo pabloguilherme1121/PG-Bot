@@ -41,7 +41,7 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLo
 function answer(text){
  if(!report)return 'Não há relatório verificável carregado. Execute o monitor no GitHub Actions e tente atualizar.';
  const q=norm(text),projects=report.projects;
- const aliases=[['PG-Arcade',['arcade','pga']],['PG-Estrategia',['estrategia']],['PG-portfolio',['portfolio','portifolio']],['PG-Bot',['pg bot','pg-bot']],['Cuidador-a-',['cuidador']],['pg-tech-storefront',['storefront','loja']],['pg-tech-operacoes',['operacoes']],['eleicoes-goias-2026',['eleicoes']]];
+ const aliases=[['PG-Arcade',['arcade','pga']],['PG-Estrategia',['estrategia']],['PG-portfolio',['portfolio','portifolio']],['PG-Bot',['pg bot','pg-bot']],['Cuidador',['cuidador']],['Cuidador-a-',['cuidador legado']],['pg-tech-storefront',['storefront','loja']],['pg-tech-operacoes',['operacoes']],['eleicoes-goias-2026',['eleicoes']]];
  const found=aliases.find(([name,terms])=>terms.some(t=>q.includes(t))&&projects.some(p=>p.repository.endsWith('/'+name)));
  if(found){const p=projects.find(item=>item.repository.endsWith('/'+found[0]));return found[0]+': '+STATE_LABELS[p.state]+'. '+p.note+' '+p.openPRs.length+' PRs abertas exibidas.'}
  if(/falh|erro|problema|bloque/.test(q)){const bad=projects.filter(p=>['falha','indisponivel'].includes(p.state));return bad.length?'Atenção: '+bad.map(p=>p.repository.split('/')[1]+' ('+STATE_LABELS[p.state]+')').join('; ')+'.':'Nenhuma falha classificada nesta amostra. Isso não garante que todos os testes passaram.'}
