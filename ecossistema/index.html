@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1423">
+<meta name="description" content="Consulta pública do ecossistema PG Bot: projetos, documentação, PRs, CI e sugestões locais para revisão.">
+<title>PG Bot | Consulta do ecossistema</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip" href="#principal">Pular para o conteúdo</a>
+<div class="shell">
+<header class="header">
+ <a class="brand" href="../" aria-label="Voltar ao PG Bot"><span class="brand-mark">PG</span><span><strong>PG Bot</strong><small>Consulta do ecossistema</small></span></a>
+ <nav aria-label="Navegação"><a href="../">Assistente de jogos</a><a href="../painel/">Homologação</a><a href="https://github.com/pabloguilherme1121/PG-Bot">Código</a></nav>
+</header>
+<main id="principal">
+ <section class="intro">
+   <div class="eyebrow">CONSULTA PÚBLICA · SEM CREDENCIAIS</div>
+   <h1>Informações verificáveis.<br><span>Sugestões sob seu controle.</span></h1>
+   <p>Consulte repositórios públicos, veja a origem das respostas e prepare próximos passos sem executar alterações. Os dados de jogos e a telemetria continuam no assistente original.</p>
+   <div class="intro-actions"><button id="refresh" class="button primary" type="button">Atualizar do GitHub</button><span id="catalog-status" role="status" aria-live="polite">Carregando catálogo público...</span></div>
+ </section>
+ <div class="layout">
+  <section class="panel catalog" aria-labelledby="catalog-title">
+    <div class="section-head"><div><span class="overline">01 / EXPLORAR</span><h2 id="catalog-title">Projetos públicos</h2></div><span class="count" id="repo-total">0</span></div>
+    <label for="repo-search">Buscar por projeto ou descrição</label>
+    <input id="repo-search" type="search" placeholder="Ex.: PG-Arcade, portfólio..." autocomplete="off">
+    <div id="repo-list" class="repo-list" aria-label="Resultados do catálogo"></div>
+    <div class="pager"><button id="prev" type="button" disabled>Anterior</button><span id="page-info" aria-live="polite">Página 1</span><button id="next" type="button" disabled>Próxima</button></div>
+  </section>
+  <div class="right-column">
+   <section class="panel details" aria-labelledby="detail-heading">
+     <div class="section-head"><div><span class="overline">02 / CONTEXTO SELECIONADO</span><h2 id="detail-heading" tabindex="-1">Escolha um projeto</h2></div><span class="status-chip" id="context-badge">Documentação pública</span></div>
+     <p id="detail-description" class="muted">Selecione um repositório no catálogo.</p>
+     <div id="detail-links" class="links"></div>
+     <p id="context-status" role="status" aria-live="polite">Nenhum projeto selecionado.</p>
+     <div class="divider"></div>
+     <h3>Perguntas rápidas</h3>
+     <div id="questions" class="questions" role="group" aria-label="Perguntas sobre o projeto"></div>
+     <div class="answer" aria-live="polite">
+       <h3>Resposta fundamentada</h3>
+       <p id="answer-text">Selecione uma pergunta para consultar as informações disponíveis.</p>
+       <div id="answer-source" class="source"></div>
+     </div>
+   </section>
+   <section class="panel tasks" aria-labelledby="tasks-title">
+     <div class="section-head"><div><span class="overline">03 / REVISÃO HUMANA</span><h2 id="tasks-title">Fila de sugestões</h2></div><span id="queue-count" class="count">0</span></div>
+     <p class="muted">As sugestões são locais e podem ser editadas, revisadas ou excluídas. Nenhuma executa commits, merges ou deploys.</p>
+     <div class="toolbar"><button id="suggest" type="button" class="button secondary" disabled>Preparar sugestão</button><button id="export" type="button" class="button subtle">Exportar JSON</button></div>
+     <div id="queue" class="queue"></div>
+     <p id="save-status" role="status" aria-live="polite" class="footnote">Salvo somente neste navegador, quando o armazenamento estiver disponível.</p>
+   </section>
+  </div>
+ </div>
+ <section class="footer-note"><strong>Limites da consulta</strong><p>Dados vêm da API pública do GitHub. Falhas ou limites de requisição mantêm o último resultado válido, identificado como antigo. Documentação e metadados não confirmam funcionalidade em produção. PR aprovada, merge, CI e deploy são etapas distintas. Nenhuma informação privada é buscada.</p></section>
+</main>
+<footer class="footer"><span>PG Bot · módulo isolado de consulta pública</span><a href="../">Voltar ao assistente de jogos</a></footer>
+</div>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
