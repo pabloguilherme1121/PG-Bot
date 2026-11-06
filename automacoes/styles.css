@@ -300,3 +300,8 @@ footer a:hover{text-decoration:underline}
   html{scroll-behavior:auto}
   *,*::before,*::after{transition:none!important;animation:none!important}
 }
+
+/* Ajuste de legibilidade mobile: evitar textos auxiliares abaixo de 11 px. */
+.logo-copy small,.stat-index{font-size:11px}
+@media(max-width:650px){.stat-index{font-size:11px}}
+@media(max-width:365px){.site-nav a{font-size:12px}.live-foot{font-size:11px}}
