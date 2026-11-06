@@ -83,12 +83,19 @@ export async function fetchContext(repo,force=false) {
     package:()=>get('/repos/'+OWNER+'/'+name+'/contents/package.json').then(readBase64Json),
     workflows:()=>get('/repos/'+OWNER+'/'+name+'/contents/.github/workflows').then(cleanWorkflows)
   };
-  const entries=await Promise.all(Object.entries(tasks).map(async ([key,request])=>{
-    try {return [key,{data:await request(),fetchedAt:new Date().toISOString(),stale:false}];}
-    catch(error) {
-      return [key,{data:old?.[key]?.data??null,fetchedAt:old?.[key]?.fetchedAt||null,stale:true,error:String(error.message)}];
+  const list=Object.entries(tasks), entries=[];
+  let cursor=0;
+  async function worker(){
+    while(cursor<list.length){
+      const [key,request]=list[cursor++];
+      try {entries.push([key,{data:await request(),fetchedAt:new Date().toISOString(),stale:false}]);}
+      catch(error){
+        entries.push([key,{data:old?.[key]?.data??null,fetchedAt:old?.[key]?.fetchedAt||null,stale:true,error:String(error.message)}]);
+      }
     }
-  }));
+  }
+  // Limita a duas consultas simultâneas por seleção; evita bursts de cinco chamadas.
+  await Promise.all([worker(),worker()]);
   const next=Object.fromEntries(entries);
   save('context:'+repo.name,next);
   return next;
