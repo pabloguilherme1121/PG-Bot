@@ -52,9 +52,23 @@ function cleanRuns(data) {
   return data.workflow_runs.slice(0,5).map(r=>({id:r.id,name:String(r.name||'').slice(0,160),
     status:r.status,conclusion:r.conclusion,head_sha:r.head_sha,html_url:r.html_url||null}));
 }
+function readBase64Json(file) {
+  if(typeof file?.content !== 'string' || file.content.length > 100000) throw Error('Manifesto inválido');
+  const bytes=Uint8Array.from(atob(file.content.replace(/\\s/g,'')),char=>char.charCodeAt(0));
+  const obj=JSON.parse(new TextDecoder().decode(bytes));
+  if(!obj || typeof obj !== 'object') throw Error('Manifesto inválido');
+  const dependencies=Object.keys(obj.dependencies||{}).slice(0,30);
+  const devDependencies=Object.keys(obj.devDependencies||{}).slice(0,30);
+  return {name:String(obj.name||'').slice(0,100),dependencies,devDependencies,
+    scripts:Object.keys(obj.scripts||{}).filter(s=>/test|build|lint|check|audit|validate|quality/i.test(s)).slice(0,20)};
+}
+function cleanWorkflows(rows) {
+  if(!Array.isArray(rows)) throw Error('Workflows não disponíveis');
+  return rows.filter(x=>/\\.ya?ml$/.test(x.name||'')).map(x=>String(x.name).slice(0,100)).slice(0,20);
+}
 function storedContext(repoName) {
   const old=read('context:'+repoName);
-  if(!old || !['readme','pulls','runs'].every(key=>old[key] && (old[key].data===null || old[key].fetchedAt))) return null;
+  if(!old || !['readme','pulls','runs','package','workflows'].every(key=>old[key] && (old[key].data===null || old[key].fetchedAt))) return null;
   return old;
 }
 export async function fetchContext(repo,force=false) {
@@ -65,7 +79,9 @@ export async function fetchContext(repo,force=false) {
   const tasks={
     readme:()=>get('/repos/'+OWNER+'/'+name+'/readme',true).then(asReadme),
     pulls:()=>get('/repos/'+OWNER+'/'+name+'/pulls?state=all&sort=updated&direction=desc&per_page=5').then(cleanPulls),
-    runs:()=>get('/repos/'+OWNER+'/'+name+'/actions/runs?per_page=5').then(cleanRuns)
+    runs:()=>get('/repos/'+OWNER+'/'+name+'/actions/runs?per_page=5').then(cleanRuns),
+    package:()=>get('/repos/'+OWNER+'/'+name+'/contents/package.json').then(readBase64Json),
+    workflows:()=>get('/repos/'+OWNER+'/'+name+'/contents/.github/workflows').then(cleanWorkflows)
   };
   const entries=await Promise.all(Object.entries(tasks).map(async ([key,request])=>{
     try {return [key,{data:await request(),fetchedAt:new Date().toISOString(),stale:false}];}
