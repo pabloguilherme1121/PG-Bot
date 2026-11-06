@@ -83,7 +83,11 @@ test('acha relatório na segunda página sem fingir ausência de dados',async({p
   return route.fulfill({
    status:200,
    contentType:'application/json',
-   headers:{link:'<'+api+'&page=2>; rel="next"'},
+   headers:{
+    'link':'<'+api+'&page=2>; rel="next"',
+    'access-control-allow-origin':'*',
+    'access-control-expose-headers':'Link'
+   },
    body:JSON.stringify(Array.from({length:100},(_,i)=>({title:'Outra issue '+i,body:'Sem relatório'})))
   });
  });
