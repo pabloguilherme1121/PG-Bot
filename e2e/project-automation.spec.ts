@@ -39,3 +39,30 @@ test('relatório com mais de 24 horas exibe aviso e não sugere dado atual',asyn
  await expect(page.locator('#overall-state')).toContainText('desatualizado');
  await expect(page.locator('#load-status')).toContainText('mais de 24 horas');
 });
+
+
+for(const width of [320,390]){
+ test('filtros do painel mostram o subconjunto correto com controle de teclado em '+width+' px',async({page})=>{
+  await page.setViewportSize({width,height:790});
+  const data={version:1,generatedAt:'2026-11-05T21:00:00.000Z',projects:[
+   {repository:'pabloguilherme1121/PG-Arcade',state:'falha',note:'Falha verificada',openPRs:[],workflows:[]},
+   {repository:'pabloguilherme1121/PG-Estrategia',state:'revisao',note:'PR aberta',openPRs:[{number:7,title:'Em revisão',draft:true,url:'https://github.com/pabloguilherme1121/PG-Estrategia/pull/7'}],workflows:[]},
+   {repository:'pabloguilherme1121/PG-Bot',state:'ok',note:'CI aprovada',openPRs:[],workflows:[]}
+  ]};
+  await page.route(api,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{title:'PG Bot | Monitoramento dos projetos',body:'<!-- pg-bot-automation:v1\n'+JSON.stringify(data)+'\n-->'}])}));
+  await page.goto('./automacoes/');
+  await expect(page.locator('#projects .project')).toHaveCount(3);
+  const attention=page.getByRole('button',{name:'Atenção'});
+  await attention.focus();
+  await page.keyboard.press('Enter');
+  await expect(attention).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('#projects .project')).toHaveCount(1);
+  await expect(page.locator('#projects')).toContainText('PG-Arcade');
+  await page.getByRole('button',{name:'Em revisão'}).click();
+  await expect(page.locator('#projects .project')).toHaveCount(1);
+  await expect(page.locator('#projects')).toContainText('PG-Estrategia');
+  await page.getByRole('button',{name:'Todos'}).click();
+  await expect(page.locator('#projects .project')).toHaveCount(3);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ });
+}
