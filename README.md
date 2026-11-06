@@ -105,3 +105,15 @@ O site estático é publicado pelo GitHub Pages a partir da branch `main` (raiz 
 ## Licença
 
 MIT, preservada do projeto PG Arcade.
+
+## Central de automação de projetos (PR em revisão)
+
+- `automacoes/`: painel mobile e consulta guiada sobre falhas, PRs e prioridades com base em relatório verificável; não é chat com IA externa.
+- `project-automation.mjs`: regras auditáveis, classificação dos últimos workflows e configuração explícita dos repositórios públicos.
+- `scripts/project-monitor.mjs`: consulta o GitHub Actions e PRs, sem alterar outros projetos.
+- `.github/workflows/project-monitor.yml`: agenda às 08h e 20h de Brasília, sujeita a atrasos do GitHub, ou disparo manual.
+- O único registro remoto criado ou atualizado é uma issue central no próprio PG Bot, usando token temporário do GitHub Actions com `issues: write` e `contents: read`.
+- Não há merge, correção, publicação automática, acesso a projetos privados ou credenciais no navegador.
+- Uma CI verde não comprova deploy. A consulta pública usa até 30 runs e 100 PRs por repositório. Falha de API permanece marcada como indisponível.
+
+Após merge e publicação real do Pages, acesse `/PG-Bot/automacoes/`. Execute o workflow na seção Actions para produzir a primeira issue. Antes do merge, nada é declarado como publicado.

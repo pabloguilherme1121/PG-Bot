@@ -1,0 +1,18 @@
+import {test,expect} from '@playwright/test';
+const api='https://api.github.com/repos/pabloguilherme1121/PG-Bot/issues?state=open&per_page=100';
+for(const width of [320,390]){
+ test('central de automações evidencia falhas sem overflow em '+width+' px',async({page})=>{
+  await page.setViewportSize({width,height:790});
+  const data={version:1,generatedAt:'2026-11-05T21:00:00.000Z',projects:[{
+   repository:'pabloguilherme1121/PG-Arcade',state:'falha',note:'Falha verificada',openPRs:[{number:20,title:'teste',draft:true,url:'https://github.com/pabloguilherme1121/PG-Arcade/pull/20'}],
+   workflows:[{id:123,name:'WebKit',status:'completed',conclusion:'failure',url:'https://github.com/pabloguilherme1121/PG-Arcade/actions/runs/123'}]
+  }]};
+  await page.route(api,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{title:'PG Bot | Monitoramento dos projetos',body:'<!-- pg-bot-automation:v1\n'+JSON.stringify(data)+'\n-->'}])}));
+  await page.goto('./automacoes/');
+  await expect(page.locator('#count-failures')).toHaveText('1');
+  await expect(page.getByRole('link',{name:'Ver falha: WebKit'})).toHaveAttribute('href',/actions\/runs\/123/);
+  await page.getByRole('button',{name:'Prioridades'}).click();
+  await expect(page.locator('#messages .message').last()).toContainText('PG-Arcade');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ });
+}
