@@ -93,7 +93,7 @@ function answer(topic) {
   if(result.stale)frag.append(text('strong','Dados antigos ou indisponíveis'));
   $('answer-source').replaceChildren(frag);
 }
-async function selectRepo(repo) {
+async function selectRepo(repo,force=false) {
   state.selected=repo;
   state.context=null;
   const token=++state.token;
@@ -105,7 +105,7 @@ async function selectRepo(repo) {
   $('answer-source').replaceChildren();
   $('context-status').textContent='Consultando GitHub sem credenciais...';
   try {
-    const context=await fetchContext(repo);
+    const context=await fetchContext(repo,force);
     if(token!==state.token)return;
     state.context=context;
     renderDetail();
@@ -121,7 +121,7 @@ async function loadCatalog(force=false) {
   $('catalog-status').textContent='Consultando o catálogo público...';
   try {
     const catalog=await fetchCatalog(force);
-    state.repos=catalog.data;
+    state.repos=catalog.data.map(r=>({...r,catalogFetchedAt:catalog.fetchedAt,catalogStale:catalog.stale}));
     $('catalog-status').textContent=(catalog.stale?'Dados antigos. ':'')+
       (catalog.error ? 'Consulta falhou: '+catalog.error+'. ' : '')+
       catalog.source+' · '+date(catalog.fetchedAt)+'.';
@@ -130,7 +130,7 @@ async function loadCatalog(force=false) {
     const preferred=state.repos.find(r=>r.name===requested);
     const first=current||preferred||state.repos.find(r=>r.name==='PG-Bot')||state.repos[0];
     renderRepos();
-    if(first)await selectRepo(first);
+    if(first)await selectRepo(first,force);
     else{
       state.selected=null;state.context=null;
       renderDetail();
@@ -197,4 +197,4 @@ $('next').addEventListener('click',()=>{state.page++;renderRepos();});
 $('refresh').addEventListener('click',()=>loadCatalog(true));
 $('suggest').addEventListener('click',addSuggestion);
 $('export').addEventListener('click',exportQueue);
-loadCatalog().catch(error=>{$('catalog-status').textContent='Erro ao consultar o catálogo: '+String(error.message);$('refresh').disabled=false;});
+loadCatalog(true).catch(error=>{$('catalog-status').textContent='Erro ao consultar o catálogo: '+String(error.message);$('refresh').disabled=false;});
