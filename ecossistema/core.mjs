@@ -121,7 +121,6 @@ export function describeQuestion(topic, repo, context) {
       const parts=[];
       if(scripts.length)parts.push('Scripts declarados: '+scripts.join(', '));
       if(Array.isArray(workflows) && workflows.length)parts.push('Workflows encontrados: '+workflows.join(', '));
-      const proof=context?.runs?.data;
       if(!parts.length)return {answer:'Scripts e workflows não encontrados ou indisponíveis. Não é possível confirmar testes.',...source('workflows')};
       return {answer:parts.join('; ')+'. A existência desses arquivos não comprova que os testes passaram. Consulte as execuções de CI para verificar SHA e conclusão.',...source(Array.isArray(workflows)&&workflows.length?'workflows':'package')};
     }
