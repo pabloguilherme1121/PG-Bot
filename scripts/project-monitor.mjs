@@ -1,11 +1,12 @@
 // GitHub API somente leitura; publica no máximo uma issue de status no próprio PG Bot.
 import {MONITORED_REPOS,REPORT_TITLE,summarizeProject,buildReport} from '../project-automation.mjs';
+import {findOpenReportIssue} from '../project-monitor-issues.mjs';
 const OWNER='pabloguilherme1121/PG-Bot';
 const publish=process.argv.includes('--publish');
 const token=process.env.GITHUB_TOKEN||'';
 const headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'PG-Bot-Monitor'};
 if(token)headers.Authorization='Bearer '+token;
-async function github(path,method='GET',body=undefined){
+async function github(path,method='GET',body=undefined,includePageMeta=false){
  const controller=new AbortController();
  const timeout=setTimeout(()=>controller.abort(),15000);
  try{
@@ -14,7 +15,8 @@ async function github(path,method='GET',body=undefined){
    body:body?JSON.stringify(body):undefined,signal:controller.signal
   });
   if(!res.ok)throw Error('GitHub HTTP '+res.status+' para '+path.split('?')[0]);
-  return await res.json();
+  const data=await res.json();
+  return includePageMeta?{items:data,link:res.headers.get('link')}:data;
  }finally{clearTimeout(timeout)}
 }
 async function inspect(repository){
@@ -32,8 +34,9 @@ async function inspect(repository){
 }
 async function upsertIssue(body){
  const path='/repos/'+OWNER+'/issues';
- const issues=await github(path+'?state=open&per_page=100');
- const existing=issues.find(issue=>!issue.pull_request&&issue.title===REPORT_TITLE);
+ const existing=await findOpenReportIssue(
+  pagePath=>github(pagePath,'GET',undefined,true),path,REPORT_TITLE
+ );
  if(existing){
   await github(path+'/'+existing.number,'PATCH',{body});
   console.log('Relatório atualizado: '+existing.html_url);
