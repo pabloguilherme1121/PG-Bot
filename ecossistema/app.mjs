@@ -153,16 +153,28 @@ function renderQueue() {
     const next=document.createElement('textarea');next.id=nextLabel.htmlFor;
     next.maxLength=1500;next.value=item.next;
     next.addEventListener('input',()=>{item.next=next.value;store();});
-    card.append(reasonLabel,reason,nextLabel,next);
-    if(item.evidence)card.append(link('Evidência pública',item.evidence));
+    const evidenceLabel=text('label','Link da evidência HTTPS');evidenceLabel.htmlFor='evidence-'+item.id;
+    const evidence=document.createElement('input');evidence.type='url';evidence.id=evidenceLabel.htmlFor;
+    evidence.value=item.evidence;evidence.maxLength=2000; evidence.placeholder='https://github.com/...';
+    evidence.addEventListener('change',()=>{
+      const url=safeHttps(evidence.value);
+      if(!url && evidence.value.trim()){
+        evidence.value=item.evidence;
+        $('save-status').textContent='Evidência inválida. Use uma URL HTTPS.';
+        return;
+      }
+      item.evidence=url||'';store();
+    });
+    card.append(reasonLabel,reason,nextLabel,next,evidenceLabel,evidence);
+    if(item.evidence)card.append(link('Abrir evidência pública',item.evidence));
     const actions=document.createElement('div');actions.className='queue-actions';
     const checkLabel=document.createElement('label');
     const checkbox=document.createElement('input');checkbox.type='checkbox';
     checkbox.checked=item.reviewed;checkbox.setAttribute('aria-label','Marcar '+item.project+' como revisada');
-    checkbox.addEventListener('change',()=>{item.reviewed=checkbox.checked;store();renderQueue();});
+    checkbox.addEventListener('change',()=>{item.reviewed=checkbox.checked;store();card.querySelector('h3').textContent=item.project+' · '+(item.reviewed?'Revisada':'A revisar');});
     checkLabel.append(checkbox,text('span','Revisada'));
     const remove=text('button','Excluir');remove.type='button';
-    remove.addEventListener('click',()=>{state.queue=state.queue.filter(x=>x.id!==item.id);store();renderQueue();});
+    remove.addEventListener('click',()=>{state.queue=state.queue.filter(x=>x.id!==item.id);store();renderQueue();$('suggest').focus();});
     actions.append(checkLabel,remove);card.append(actions);container.append(card);
   }
   $('queue').replaceChildren(container);
