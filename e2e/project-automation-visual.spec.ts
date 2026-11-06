@@ -26,7 +26,25 @@ test.describe('PG Bot: identidade visual da central de automações',()=>{
    expect(visual.overflow).toBe(false);
   });
  }
- test('primeiro Tab alcança skip-link e movimento reduzido é respeitado',async({page})=>{
+ for(const width of [320,390]){
+  test('atalhos de navegação chegam às seções e são acessíveis em '+width+' px',async({page})=>{
+   await page.setViewportSize({width,height:820});
+   await page.route('https://api.github.com/repos/pabloguilherme1121/PG-Bot/issues?state=open&per_page=100',route=>route.fulfill({status:200,contentType:'application/json',body:'[]'}));
+   await page.goto('./automacoes/');
+   const nav=page.getByRole('navigation',{name:'Seções da central'});
+   await expect(nav).toBeVisible();
+   for(const item of [['Prioridades','#triage'],['Projetos','#projects-title'],['Perguntar','#assistant-title']]){
+    const link=nav.getByRole('link',{name:item[0]});
+    await expect(link).toHaveAttribute('href',item[1]);
+    await expect(link).toHaveCSS('min-height','44px');
+   }
+   await nav.getByRole('link',{name:'Perguntar'}).click();
+   await expect(page).toHaveURL(/#assistant-title$/);
+   await expect(page.locator('#assistant-title')).toBeVisible();
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  });
+ }
+  test('primeiro Tab alcança skip-link e movimento reduzido é respeitado',async({page})=>{
   await page.setViewportSize({width:320,height:820});
   await page.route('https://api.github.com/repos/pabloguilherme1121/PG-Bot/issues?state=open&per_page=100',route=>route.fulfill({status:200,contentType:'application/json',body:'[]'}));
   await page.emulateMedia({reducedMotion:'reduce'});
