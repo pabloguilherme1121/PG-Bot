@@ -17,8 +17,8 @@
   --warning:#efae91;
   --danger:#ffbbb5;
   --success:#9fe6cd;
-  --font-body:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --font-display:"Space Grotesk","Inter",system-ui,sans-serif;
+  --font-body:"Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-display:"Space Grotesk","Manrope",system-ui,sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,monospace;
 }
 *{box-sizing:border-box}
@@ -337,3 +337,12 @@ footer a:hover{text-decoration:underline}
   .section-nav-index{width:20px;height:20px}
 }
 @media(prefers-reduced-motion:reduce){.section-nav a{transition:none}}
+
+/* Busca de projetos. Campos grandes, sem teclado cobrindo controles. */
+.project-tools{display:grid;grid-template-columns:auto minmax(160px,1fr) auto;gap:10px;align-items:center;margin:0 0 16px;padding:13px 15px;background:var(--surface);border:1px solid var(--border);border-radius:13px}
+.project-tools label{font-size:13px;font-weight:700;color:var(--text)}
+.project-tools input{display:block;width:100%;min-width:0;min-height:48px;padding:11px 14px;background:var(--bg);border:1px solid var(--border-strong);border-radius:10px;color:var(--text);font-size:14px}
+.project-tools input::placeholder{color:var(--muted)}
+.project-tools input:focus-visible{border-color:var(--link);outline-offset:2px}
+.project-tools p{margin:0;color:var(--muted);font-size:12px;text-align:right}
+@media(max-width:650px){.project-tools{grid-template-columns:1fr;gap:7px;padding:12px}.project-tools label{font-size:12px}.project-tools p{text-align:left}}
