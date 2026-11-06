@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: '24'
       - name: Verificar lógica antes de coletar dados
-        run: node --test tests/project-automation.test.mjs
+        run: node --test tests/project-automation.test.mjs tests/project-monitor-issues.test.mjs
       - name: Consultar evidências e atualizar uma issue central
         env:
           GITHUB_TOKEN: ${{ github.token }}
