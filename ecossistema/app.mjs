@@ -187,7 +187,7 @@ function exportQueue() {
 if(new URL(location.href).searchParams.get('embed')==='1') {
   document.body.classList.add('embed');
   const close=text('button','Fechar assistente');close.type='button';close.className='button subtle';
-  close.addEventListener('click',()=>window.parent.postMessage({type:'pgbot-ecosystem-close'},location.origin));
+  close.addEventListener('click',()=>window.parent.postMessage({type:'pgbot-ecosystem-close'},'*'));
   document.querySelector('.intro-actions').append(close);
 }
 state.queue=readQueue();renderQueue();
