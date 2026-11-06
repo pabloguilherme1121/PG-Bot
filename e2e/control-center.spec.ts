@@ -34,4 +34,19 @@ test.describe('PG Bot Control Center',()=>{
   await check.check();
   await expect(pr).toContainText('Merge não confirmado');
  });
+ test('CI de SHA antigo não comprova a HEAD atual da main',async ({page})=>{
+  const currentSha='a'.repeat(40);
+  await page.route('https://api.github.com/**',async route=>{
+   const url=new URL(route.request().url());
+   if(url.pathname.endsWith('/branches/main'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({commit:{sha:currentSha}})});
+   if(url.pathname.endsWith('/actions/runs'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({workflow_runs:[{id:123,name:'Qualidade PG Bot',head_branch:'main',head_sha:'b'.repeat(40),status:'completed',conclusion:'success',created_at:'2026-11-06T12:00:00Z'}]})});
+   return route.fulfill({status:404,contentType:'application/json',body:'{}'});
+  });
+  await page.goto('painel/');
+  await page.locator('#sync-btn').click();
+  await expect(page.locator('#sync-btn')).toBeEnabled();
+  const gate=await page.evaluate(()=>JSON.parse(localStorage.getItem('pgbot-control-center-v1')!).gates.find((g:{id:string})=>g.id==='arc-bot-ci'));
+  expect(gate.status).toBe('em-validacao');
+  expect(gate.evidenceIds).toEqual([]);
+ });
 });
