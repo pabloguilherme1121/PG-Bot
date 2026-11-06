@@ -305,3 +305,35 @@ footer a:hover{text-decoration:underline}
 .logo-copy small,.stat-index{font-size:11px}
 @media(max-width:650px){.stat-index{font-size:11px}}
 @media(max-width:365px){.site-nav a{font-size:12px}.live-foot{font-size:11px}}
+
+/* Navegação curta: útil no celular sem adicionar scripts nem menu sobreposto. */
+.section-nav{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin:15px 0 0;padding:8px;border:1px solid var(--border);
+  background:var(--surface);border-radius:14px;
+}
+.section-nav a{
+  min-height:44px;min-width:0;flex:1 1 130px;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  border-radius:10px;padding:9px 12px;color:var(--muted-strong);
+  font-weight:700;font-size:13px;transition:background-color .18s,color .18s;
+}
+.section-nav a:hover,.section-nav a:focus-visible{
+  background:var(--surface-hover);color:var(--text);
+}
+.section-nav-index{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex-shrink:0;width:26px;height:26px;border-radius:8px;
+  border:1px solid var(--border-strong);font:600 10px/1 var(--font-mono);color:var(--accent);
+}
+#triage,#projects-title,#assistant-title{scroll-margin-top:18px}
+@media(max-width:560px){
+  .section-nav{gap:4px;padding:5px;margin-top:12px}
+  .section-nav a{flex:1 1 0;padding:8px 5px;gap:5px;font-size:12px}
+  .section-nav-index{width:22px;height:22px;font-size:9px}
+}
+@media(max-width:350px){
+  .section-nav a{font-size:11px;gap:3px}
+  .section-nav-index{width:20px;height:20px}
+}
+@media(prefers-reduced-motion:reduce){.section-nav a{transition:none}}
