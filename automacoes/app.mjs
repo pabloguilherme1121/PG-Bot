@@ -6,9 +6,15 @@ const priority={falha:0,indisponivel:1,executando:2,revisao:3,sem_dados:4,ok:5};
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n};
 let report=null;
 let projectFilter='all';
-const filterProject=p=>projectFilter==='all'||(projectFilter==='attention'&&['falha','indisponivel','executando','sem_dados'].includes(p.state))||(projectFilter==='review'&&p.state==='revisao')||(projectFilter==='ok'&&p.state==='ok');
+let projectQuery='';
+let latestFetchFailed=false;
+const filterProject=p=>{
+ const stateMatch=projectFilter==='all'||(projectFilter==='attention'&&['falha','indisponivel','executando','sem_dados'].includes(p.state))||(projectFilter==='review'&&p.state==='revisao')||(projectFilter==='ok'&&p.state==='ok');
+ return stateMatch&&(!projectQuery||norm(p.repository.split('/')[1]).includes(norm(projectQuery)));
+};
 function updateFilterButtons(){
- for(const button of document.querySelectorAll('[data-project-filter]')){
+ $('project-search').addEventListener('input',event=>{projectQuery=event.target.value.trim();if(report)render();});
+for(const button of document.querySelectorAll('[data-project-filter]')){
   const selected=button.dataset.projectFilter===projectFilter;
   button.classList.toggle('is-active',selected);
   button.setAttribute('aria-pressed',String(selected));
@@ -17,6 +23,7 @@ function updateFilterButtons(){
 function render(){
  const projects=report.projects.slice().sort((a,b)=>(priority[a.state]??9)-(priority[b.state]??9));
  const visibleProjects=projects.filter(filterProject);
+ $('project-search-status').textContent=visibleProjects.length+' de '+projects.length+' projetos exibidos.';
  updateFilterButtons();
  $('count-projects').textContent=String(projects.length);
  $('count-failures').textContent=String(projects.filter(p=>p.state==='falha').length);
@@ -39,7 +46,7 @@ function render(){
   return card;
  }));
  if(!visibleProjects.length)$('projects').replaceChildren(el('p','empty-state','Nenhum projeto nesta categoria. Selecione outro filtro.'));
- const actions=planActions(report).slice(0,6);
+ const actions=planActions(report).filter(a=>filterProject({repository:a.repository,state:a.category})).slice(0,6);
  $('action-queue').replaceChildren(...actions.map(a=>{
   const card=el('article','action-item'),head=el('div','action-head');
   head.append(el('span','action-priority '+a.priority.toLowerCase(),a.priority),el('span','',a.project));
@@ -48,6 +55,7 @@ function render(){
   link.href=a.url;link.rel='noopener noreferrer';link.target='_blank';card.append(link);
   return card;
  }));
+ if(!actions.length)$('action-queue').append(el('p','empty-state','Nenhuma ação encontrada para os filtros atuais.'));
  const freshness=reportFreshness(report.generatedAt);
  if(freshness.status!=='atual')$('overall-state').textContent=freshness.status==='desatualizado'?'Relatório desatualizado':'Data do relatório inválida';
 }
@@ -66,7 +74,7 @@ function answer(text){
  }
  return 'Resumo de '+new Date(report.generatedAt).toLocaleDateString('pt-BR')+': '+projects.length+' projetos, '+projects.filter(p=>p.state==='falha').length+' falhas de CI e '+projects.filter(p=>p.state==='indisponivel').length+' consultas indisponíveis. Pergunte por falhas, PRs, prioridades ou um projeto.';
 }
-function reply(q){const log=$('messages');log.append(el('p','message user',q),el('p','message',answer(q)));log.scrollTop=log.scrollHeight}
+function reply(q){const log=$('messages');const prefix=latestFetchFailed&&report?'Resposta baseada no relatório anterior, não atualizado. ':'';log.append(el('p','message user',q),el('p','message',prefix+answer(q)));log.scrollTop=log.scrollHeight}
 async function refresh(){
  $('refresh').disabled=true;$('load-status').textContent='Consultando GitHub...';
  try{
@@ -77,9 +85,15 @@ async function refresh(){
   const data=issue&&parseReport(issue.body);
   if(!data)throw Error('Relatório ainda não publicado ou inválido');
   if(reportFreshness(data.generatedAt).status==='invalido')throw Error('Data do relatório inválida');
-  report=data;render();
+  report=data;latestFetchFailed=false;render();
   $('load-status').textContent=reportFreshness(report.generatedAt).status==='desatualizado'?'Relatório desatualizado (mais de 24 horas). Reexecute o monitor; não presuma estado atual.':'Snapshot carregado. Os dados não são uma verificação em tempo real.';
- }catch(error){$('load-status').textContent=error.message+'. Nenhum resultado foi presumido.'}
+ }catch(error){
+  latestFetchFailed=true;
+  const prior=Boolean(report);
+  $('load-status').textContent='Consulta indisponível: '+error.message+'. '+(prior?'Exibindo dados anteriores; não são verificação atual.':'Nenhum resultado foi presumido.');
+  $('overall-state').textContent=prior?'Consulta indisponível, dados anteriores':'Consulta indisponível';
+  document.querySelector('.live').dataset.health='indisponivel';
+ }
  finally{$('refresh').disabled=false}
 }
 for(const button of document.querySelectorAll('[data-project-filter]')){
