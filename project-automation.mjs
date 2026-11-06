@@ -2,7 +2,7 @@
 export const MONITORED_REPOS=Object.freeze([
  'pabloguilherme1121/PG-Bot','pabloguilherme1121/PG-Arcade',
  'pabloguilherme1121/PG-Estrategia','pabloguilherme1121/PG-portfolio',
- 'pabloguilherme1121/pg-tech-storefront','pabloguilherme1121/pg-tech-operacoes',
+ 'Pabloguilherme01/Cuidador','pabloguilherme1121/pg-tech-operacoes',
  'pabloguilherme1121/Cuidador-a-','pabloguilherme1121/eleicoes-goias-2026',
  'pabloguilherme1121/universo-pablo-builds','pabloguilherme1121/Eliane-template-01',
  'pabloguilherme1121/elianefashion-netlify-template'
