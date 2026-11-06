@@ -47,6 +47,8 @@ test.describe('PG Bot | ecossistema público',()=>{
     await page.locator('#suggest').click();
     await expect(page.locator('.queue-card')).toHaveCount(1);
     await page.locator('.queue-card textarea').first().fill('Revisão documentada com referência');
+    await page.locator('.queue-card input[type="url"]').fill('https://github.com/pabloguilherme1121/PG-Bot/pull/22');
+    await page.locator('.queue-card input[type="url"]').press('Tab');
     await page.locator('.queue-card input[type="checkbox"]').check();
     const promise=page.waitForEvent('download');
     await page.getByRole('button',{name:'Exportar JSON'}).click();
@@ -54,6 +56,7 @@ test.describe('PG Bot | ecossistema público',()=>{
     expect(file.suggestedFilename()).toBe('pg-bot-sugestoes.json');
     await page.reload();
     await expect(page.locator('.queue-card textarea').first()).toHaveValue('Revisão documentada com referência');
+    await expect(page.locator('.queue-card input[type="url"]')).toHaveValue('https://github.com/pabloguilherme1121/PG-Bot/pull/22');
     await expect(page.locator('.queue-card input[type="checkbox"]')).toBeChecked();
     await page.getByRole('button',{name:'Excluir'}).click();
     await expect(page.locator('.queue-card')).toHaveCount(0);
