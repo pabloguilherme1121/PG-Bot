@@ -49,3 +49,46 @@ test('falha ao atualizar mantém snapshot anterior e sinaliza consulta indispon�
  await expect(page.locator('#overall-state')).toContainText('Consulta indisponível');
  await expect(page.locator('#projects .project')).toHaveCount(3);
 });
+
+
+test('busca não multiplica handlers quando os cartões são renderizados',async({page})=>{
+ await page.addInitScript(()=>{
+  const original=EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener=function(type,listener,options){
+   if(type==='input'&&this instanceof HTMLInputElement&&this.id==='project-search'){
+    (window as any).__pgSearchRegistrations=((window as any).__pgSearchRegistrations||0)+1;
+   }
+   return original.call(this,type,listener,options);
+  };
+ });
+ await page.route(api,route=>route.fulfill({status:200,contentType:'application/json',body:mockIssue()}));
+ await page.goto('./automacoes/');
+ const search=page.getByRole('searchbox',{name:'Buscar projeto'});
+ await expect(page.locator('#projects .project')).toHaveCount(3);
+ await search.fill('P');
+ await search.fill('PG');
+ await search.fill('Arcade');
+ await expect(page.locator('#projects .project')).toHaveCount(1);
+ expect(await page.evaluate(()=>(window as any).__pgSearchRegistrations)).toBe(1);
+});
+
+test('acha relatório na segunda página sem fingir ausência de dados',async({page})=>{
+ let requests=0;
+ await page.route('**/repos/pabloguilherme1121/PG-Bot/issues?*',route=>{
+  requests++;
+  const url=new URL(route.request().url());
+  if(url.searchParams.get('page')==='2'){
+   return route.fulfill({status:200,contentType:'application/json',body:mockIssue()});
+  }
+  return route.fulfill({
+   status:200,
+   contentType:'application/json',
+   headers:{link:'<'+api+'&page=2>; rel="next"'},
+   body:JSON.stringify(Array.from({length:100},(_,i)=>({title:'Outra issue '+i,body:'Sem relatório'})))
+  });
+ });
+ await page.goto('./automacoes/');
+ await expect(page.locator('#projects .project')).toHaveCount(3);
+ await expect(page.locator('#load-status')).toContainText('Snapshot carregado');
+ expect(requests).toBe(2);
+});
