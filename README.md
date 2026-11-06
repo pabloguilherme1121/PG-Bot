@@ -115,5 +115,7 @@ MIT, preservada do projeto PG Arcade.
 - O único registro remoto criado ou atualizado é uma issue central no próprio PG Bot, usando token temporário do GitHub Actions com `issues: write` e `contents: read`.
 - Não há merge, correção, publicação automática, acesso a projetos privados ou credenciais no navegador.
 - Uma CI verde não comprova deploy. A consulta pública usa até 30 runs e 100 PRs por repositório. Falha de API permanece marcada como indisponível.
+- A central percorre até 5 páginas da API de issues para localizar o relatório. A rotina também verifica essas páginas antes de criar a issue, impedindo duplicatas por paginação incompleta.
+- A busca de projetos registra apenas um evento de digitação, sem acumular handlers a cada renderização. Erros de consulta preservam os dados anteriores, mas exibem aviso de indisponibilidade.
 
 Após merge e publicação real do Pages, acesse `/PG-Bot/automacoes/`. Execute o workflow na seção Actions para produzir a primeira issue. Antes do merge, nada é declarado como publicado.
