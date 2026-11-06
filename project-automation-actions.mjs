@@ -1,10 +1,10 @@
 // Sugestões somente leitura. Esta camada nunca executa comandos, merges ou deploys.
-const OWNER='pabloguilherme1121';
+import {MONITORED_REPOS} from './project-automation.mjs';
 const STATES=new Set(['falha','indisponivel','executando','revisao','sem_dados','ok']);
 const ORDER={falha:0,indisponivel:1,executando:2,revisao:3,sem_dados:4,ok:5};
 const FAILURE=new Set(['failure','timed_out','action_required','startup_failure']);
-const shortName=repository=>repository.slice(OWNER.length+1);
-const safeRepository=repository=>typeof repository==='string'&&new RegExp('^'+OWNER+'/[a-zA-Z0-9._-]{1,100}$').test(repository);
+const shortName=repository=>repository.split('/')[1];
+const safeRepository=repository=>typeof repository==='string'&&MONITORED_REPOS.includes(repository);
 const idIsValid=id=>Number.isSafeInteger(id)&&id>0;
 
 export function planActions(report){
