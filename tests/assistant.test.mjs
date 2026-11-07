@@ -39,6 +39,13 @@ test('placar atual deve encaminhar para o jogo sem fingir acesso ao estado da pa
  assert.equal(answerQuestion('Meus recordes',snake).topic,'recordes');
  assert.equal(answerQuestion('Como jogar?',snake).topic,'objetivo');
 });
+test('perguntas sobre jogadas e movimentos não recebem objetivo como resposta',()=>{
+ for(const question of ['Quantas jogadas fiz?', 'Jogadas atuais', 'Meus movimentos']){
+  const result=answerQuestion(question,snake);
+  assert.equal(result.topic,'situacao',question);
+  assert.match(result.answer,/não acompanha a partida em tempo real/);
+ }
+});
 test('offline, reinício, progresso e acessibilidade são transparentes',()=>{
  for(const [question,expected] of [['Funciona offline?','offline'],['quero reiniciar','reiniciar'],['meus recordes','recordes'],['Como usar teclado?','acessibilidade'],['Me dê uma dica de estratégia','dica']])
   assert.equal(answerQuestion(question,snake).topic,expected,question);
