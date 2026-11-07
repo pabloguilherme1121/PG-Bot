@@ -20,11 +20,31 @@ export function mergeGithubPr(pr,payload,time){
  const mergedAt=typeof payload.merged_at==='string'&&Number.isFinite(Date.parse(payload.merged_at))?payload.merged_at:null;
  return {...pr,mergedAt,githubState:mergedAt?'merged':payload.state==='open'?'open':payload.state==='closed'?'closed':pr.githubState,lastChecked:time,source:'github-api'};
 }
-export function normalizeImport(raw){
+export function normalizeImport(raw,{untrusted=false}={}){
  if(!raw||raw.version!==1||typeof raw.snapshotAt!=='string'||!['gates','integrations','prs','evidences','tasks'].every(k=>Array.isArray(raw[k]))||raw.gates.length>200||raw.integrations.length>400||raw.prs.length>200||raw.evidences.length>700||raw.tasks.length>400||Object.keys(raw).some(k=>!['version','snapshotAt','updatedAt','lastGithubSync','gates','integrations','prs','evidences','tasks'].includes(k)))throw Error('Arquivo inválido: esquema não reconhecido.');
  for(const field of ['gates','integrations','prs','evidences','tasks'])for(const item of raw[field])if(!item||typeof item.id!=='string'||item.id.length>100)throw Error('Arquivo inválido: registros inconsistentes.');
  const bytes=JSON.stringify(raw).length;if(bytes>2000000)throw Error('Arquivo muito grande.');
- return structuredClone(raw);
+ const restored=structuredClone(raw);
+ if(untrusted){
+  // Editable JSON backups cannot attest that GitHub verified a source.
+  for(const evidence of restored.evidences){
+   if(evidence.source==='github-api'){evidence.verified=false;evidence.reviewed=false;}
+  }
+  for(const pr of restored.prs){
+   pr.mergedAt=null;pr.githubState='pending';pr.lastChecked=null;pr.source='imported';
+   if(Array.isArray(pr.checklist)&&pr.checklist[4])pr.checklist[4].done=false;
+  }
+  restored.lastGithubSync=null;
+ }
+ return restored;
+}
+export function upsertGithubEvidence(state,evidence){
+ const url=safeHttpUrl(evidence?.url);
+ if(!state||!Array.isArray(state.evidences)||evidence?.source!=='github-api'||evidence.verified!==true||!url||new URL(url).hostname!=='github.com'||typeof evidence.id!=='string')throw Error('Evidência GitHub inválida');
+ const next={...evidence,url};
+ const index=state.evidences.findIndex(existing=>existing.id===next.id);
+ if(index>=0)state.evidences[index]=next;
+ else state.evidences.push(next);
 }
 export function makeSeed(){
  const evidence=(id,project,title,url,kind='GitHub')=>({id,project,title,url,kind,source:'github-api',verified:true,reviewed:false,note:'Verificado por consulta ao GitHub; verificar SHA, escopo e data ao reutilizar.',date:'2026-11-03T01:45:00-03:00'});
