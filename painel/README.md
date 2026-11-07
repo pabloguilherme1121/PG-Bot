@@ -23,3 +23,7 @@ Para abrir localmente, rode `npm run dev` na raiz e acesse `http://127.0.0.1:548
 
 ## Arquitetura
 `data.mjs` define snapshot e gates, `app.mjs` apresenta estado e fluxos, `styles.css` trata mobile e acessibilidade. O código não importa `app.mjs`, `live-telemetry.mjs` ou motores de jogos da aplicação principal, reduzindo risco de regressão. Não há novas dependências npm.
+
+## Segurança de backups importados
+
+Arquivos JSON são editáveis e não autenticam respostas do GitHub. Ao importar um backup, evidências marcadas como originadas da API e estados de merge passam a exigir uma nova consulta por **Consultar GitHub**. Revisões manuais e notas permanecem no arquivo. A consulta atualiza registros existentes de mesma ID sem criar duplicatas. O conteúdo local continua sendo uma anotação, não uma assinatura criptográfica nem uma prova de deploy.
