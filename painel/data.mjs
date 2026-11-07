@@ -21,22 +21,61 @@ export function mergeGithubPr(pr,payload,time){
  return {...pr,mergedAt,githubState:mergedAt?'merged':payload.state==='open'?'open':payload.state==='closed'?'closed':pr.githubState,lastChecked:time,source:'github-api'};
 }
 export function normalizeImport(raw,{untrusted=false}={}){
- if(!raw||raw.version!==1||typeof raw.snapshotAt!=='string'||!['gates','integrations','prs','evidences','tasks'].every(k=>Array.isArray(raw[k]))||raw.gates.length>200||raw.integrations.length>400||raw.prs.length>200||raw.evidences.length>700||raw.tasks.length>400||Object.keys(raw).some(k=>!['version','snapshotAt','updatedAt','lastGithubSync','gates','integrations','prs','evidences','tasks'].includes(k)))throw Error('Arquivo inválido: esquema não reconhecido.');
- for(const field of ['gates','integrations','prs','evidences','tasks'])for(const item of raw[field])if(!item||typeof item.id!=='string'||item.id.length>100)throw Error('Arquivo inválido: registros inconsistentes.');
- const bytes=JSON.stringify(raw).length;if(bytes>2000000)throw Error('Arquivo muito grande.');
- const restored=structuredClone(raw);
- if(untrusted){
-  // Editable JSON backups cannot attest that GitHub verified a source.
-  for(const evidence of restored.evidences){
-   if(evidence.source==='github-api'){evidence.verified=false;evidence.reviewed=false;}
-  }
-  for(const pr of restored.prs){
-   pr.mergedAt=null;pr.githubState='pending';pr.lastChecked=null;pr.source='imported';
-   if(Array.isArray(pr.checklist)&&pr.checklist[4])pr.checklist[4].done=false;
-  }
-  restored.lastGithubSync=null;
+ const invalid=()=>{throw Error('Arquivo inválido: registros inconsistentes.');};
+ const text=(value,max=5000)=>typeof value==='string'&&value.length<=max;
+ const ids=value=>Array.isArray(value)&&value.length<=700&&value.every(id=>text(id,100));
+ const date=value=>text(value,80)&&Number.isFinite(Date.parse(value));
+ const optionalDate=value=>value==null||value===''||date(value);
+ if(!raw||raw.version!==1||!date(raw.snapshotAt)||!optionalDate(raw.updatedAt)||!optionalDate(raw.lastGithubSync)||
+    !['gates','integrations','prs','evidences','tasks'].every(key=>Array.isArray(raw[key]))||
+    raw.gates.length>200||raw.integrations.length>400||raw.prs.length>200||
+    raw.evidences.length>700||raw.tasks.length>400||
+    Object.keys(raw).some(key=>!['version','snapshotAt','updatedAt','lastGithubSync','gates','integrations','prs','evidences','tasks'].includes(key)))
+   throw Error('Arquivo inválido: esquema não reconhecido.');
+ for(const field of ['gates','integrations','prs','evidences','tasks']){
+   for(const item of raw[field]){
+     if(!item||typeof item!=='object'||Array.isArray(item)||!text(item.id,100)||!item.id)invalid();
+   }
  }
- return restored;
+ for(const gate of raw.gates){
+   if(!text(gate.title)||!text(gate.status,50)||!text(gate.project,50)||
+      typeof gate.critical!=='boolean'||!ids(gate.evidenceIds))invalid();
+ }
+ for(const integration of raw.integrations){
+   if(!text(integration.title)||!text(integration.project,50)||!ids(integration.evidenceIds))invalid();
+ }
+ for(const pr of raw.prs){
+   if(!text(pr.title)||!text(pr.repo,100)||!Number.isSafeInteger(pr.number)||
+      pr.number<1||!safeHttpUrl(pr.url)||!optionalDate(pr.mergedAt)||
+      !optionalDate(pr.lastChecked)||!Array.isArray(pr.checklist)||pr.checklist.length>30||
+      !pr.checklist.every(check=>check&&typeof check==='object'&&!Array.isArray(check)&&
+        text(check.label)&&typeof check.done==='boolean'&&(check.note==null||text(check.note))))invalid();
+ }
+ for(const ev of raw.evidences){
+   if(!text(ev.title)||!safeHttpUrl(ev.url)||!optionalDate(ev.date)||
+      (ev.note!=null&&!text(ev.note))||
+      (ev.reviewed!=null&&typeof ev.reviewed!=='boolean')||
+      (ev.verified!=null&&typeof ev.verified!=='boolean'))invalid();
+ }
+ for(const task of raw.tasks){
+   if(!text(task.title)||!text(task.project,50)||!text(task.priority,20)||
+      (task.notes!=null&&!text(task.notes)))invalid();
+ }
+ let bytes;
+ try{bytes=JSON.stringify(raw).length;}catch{invalid();}
+ if(bytes>2000000)throw Error('Arquivo muito grande.');
+ const restored=structuredClone(raw);
+  if(untrusted){
+   for(const evidence of restored.evidences){
+    if(evidence.source==='github-api'){evidence.verified=false;evidence.reviewed=false;}
+   }
+   for(const pr of restored.prs){
+    pr.mergedAt=null;pr.githubState='pending';pr.lastChecked=null;pr.source='imported';
+    if(Array.isArray(pr.checklist)&&pr.checklist[4])pr.checklist[4].done=false;
+   }
+   restored.lastGithubSync=null;
+  }
+  return restored;
 }
 export function upsertGithubEvidence(state,evidence){
  const url=safeHttpUrl(evidence?.url);
@@ -45,6 +84,32 @@ export function upsertGithubEvidence(state,evidence){
  const index=state.evidences.findIndex(existing=>existing.id===next.id);
  if(index>=0)state.evidences[index]=next;
  else state.evidences.push(next);
+}
+/**
+ * A JSON file cannot authenticate the origin of its own proof flags.
+ * Keep its notes and links, but ask for a fresh GitHub lookup or human review.
+ */
+export function normalizeExternalBackup(raw){
+ const state=normalizeImport(raw);
+ for(const evidence of state.evidences){
+  evidence.verified=false;
+  evidence.reviewed=false;
+ }
+ for(const pr of state.prs){
+  pr.mergedAt=null;
+  pr.githubState='em-validacao';
+  pr.lastChecked=null;
+  pr.source='backup';
+  for(const check of pr.checklist){
+   if(check.label==='Merge na main confirmado'||check.label==='Produção validada separadamente')
+    check.done=false;
+  }
+ }
+ for(const gate of state.gates){
+  if(gate.status==='comprovado'&&!verifiedGate(state,gate))gate.status='em-validacao';
+ }
+ state.lastGithubSync=null;
+ return state;
 }
 export function makeSeed(){
  const evidence=(id,project,title,url,kind='GitHub')=>({id,project,title,url,kind,source:'github-api',verified:true,reviewed:false,note:'Verificado por consulta ao GitHub; verificar SHA, escopo e data ao reutilizar.',date:'2026-11-03T01:45:00-03:00'});
