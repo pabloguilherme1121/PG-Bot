@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#09141E">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="PG Bot Automações: acompanhe CI, PRs e prioridades dos projetos com links de evidências do GitHub.">
+  <title>PG Bot | Central de Automações</title>
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip" href="#main" tabindex="0">Pular para conteúdo</a>
+  <div class="shell">
+    <header class="top">
+      <a class="logo" href="../" aria-label="PG Bot, voltar ao assistente de jogos">
+        <span class="logo-mark" aria-hidden="true"><img src="../icon.svg" width="29" height="29" alt=""></span>
+        <span class="logo-copy"><strong>PG <span>BOT</span></strong><small>CENTRAL DE AUTOMAÇÕES</small></span>
+      </a>
+      <nav class="site-nav" aria-label="Navegação principal">
+        <a href="../">Assistente</a>
+        <a href="https://github.com/pabloguilherme1121/PG-Bot/pull/19">Qualidade</a>
+        <a class="nav-primary" href="https://github.com/pabloguilherme1121/PG-Bot/actions">GitHub Actions <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+
+    <nav class="section-nav" aria-label="Seções da central">
+      <a href="#triage"><span class="section-nav-index">01</span> Prioridades</a>
+      <a href="#projects-title"><span class="section-nav-index">02</span> Projetos</a>
+      <a href="#assistant-title"><span class="section-nav-index">03</span> Perguntar</a>
+    </nav>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="signal" aria-hidden="true"></span> PG ECOSSISTEMA <span class="eyebrow-divider">/</span> WORKSPACE</div>
+          <h1 id="hero-title">Seus projetos.<br><em>Uma central.</em></h1>
+          <p class="lead">Priorize falhas, acompanhe PRs e consulte evidências sem alternar entre dezenas de abas. Cada recomendação aponta para sua origem no GitHub.</p>
+          <div class="actions">
+            <button id="refresh" type="button"><span aria-hidden="true">⟳</span> Atualizar relatório</button>
+            <a class="btn-secondary" href="https://github.com/pabloguilherme1121/PG-Bot/issues">Ver relatórios <span aria-hidden="true">↗</span></a>
+          </div>
+          <p class="hero-caution">Somente leitura. Sem merge, deploy ou alterações automáticas nos seus repositórios.</p>
+        </div>
+        <aside class="live" aria-labelledby="live-title">
+          <div class="live-head"><span class="live-icon" aria-hidden="true">◎</span><span id="live-title" class="eyebrow">ESTADO DA MONITORAÇÃO</span></div>
+          <strong id="overall-state" aria-live="polite">Aguardando dados</strong>
+          <p id="last-check">Nenhum relatório carregado.</p>
+          <div class="live-divider"></div>
+          <div class="live-foot"><span class="mini-dot" aria-hidden="true"></span> Consulta à API pública do GitHub <span class="live-foot-sep">·</span> Sem acesso de escrita</div>
+        </aside>
+      </section>
+
+      <section class="stats" aria-label="Indicadores do relatório">
+        <div class="stat"><span class="stat-index">01 / PORTFÓLIO</span><span class="stat-label">Projetos monitorados</span><strong id="count-projects">0</strong></div>
+        <div class="stat stat-danger"><span class="stat-index">02 / ALERTAS</span><span class="stat-label">Falhas de CI</span><strong id="count-failures">0</strong></div>
+        <div class="stat"><span class="stat-index">03 / REVISÃO</span><span class="stat-label">PRs exibidas</span><strong id="count-prs">0</strong></div>
+        <div class="stat stat-warning"><span class="stat-index">04 / FONTES</span><span class="stat-label">Consultas indisponíveis</span><strong id="count-unavailable">0</strong></div>
+      </section>
+
+      <p id="load-status" class="load-status" role="status" aria-live="polite">Consultando relatório público.</p>
+
+      <section class="triage" id="triage" aria-labelledby="triage-title">
+        <div class="section-head">
+          <div><p class="eyebrow">01 <span class="eyebrow-divider">/</span> AGIR COM CRITÉRIO</p><h2 id="triage-title">O que revisar primeiro</h2></div>
+          <p>Ações sugeridas por gravidade e evidência. Nenhuma é executada sem revisão.</p>
+        </div>
+        <div id="action-queue" class="action-queue" aria-live="polite"><p class="empty-state">Aguardando evidências para organizar as ações.</p></div>
+      </section>
+
+      <section class="projects-section" aria-labelledby="projects-title">
+        <div class="section-head">
+          <div><p class="eyebrow">02 <span class="eyebrow-divider">/</span> VISÃO POR REPOSITÓRIO</p><h2 id="projects-title">Estado dos projetos</h2></div>
+          <p>CI, revisão e publicação são verificações diferentes.</p>
+        </div>
+        <div class="filters" role="group" aria-label="Filtrar estado dos projetos">
+          <button class="filter-chip is-active" type="button" data-project-filter="all" aria-pressed="true">Todos</button>
+          <button class="filter-chip" type="button" data-project-filter="attention" aria-pressed="false">Atenção</button>
+          <button class="filter-chip" type="button" data-project-filter="review" aria-pressed="false">Em revisão</button>
+          <button class="filter-chip" type="button" data-project-filter="ok" aria-pressed="false">CI aprovada</button>
+        </div>
+        <div class="project-tools">
+          <label for="project-search">Buscar projeto</label>
+          <input id="project-search" type="search" autocomplete="off" maxlength="100" placeholder="Ex.: PG Estratégia" aria-describedby="project-search-status">
+          <p id="project-search-status" role="status" aria-live="polite">Aguardando relatório para pesquisar.</p>
+        </div>
+        <div id="projects" class="projects"><p class="empty-state">Aguardando relatório verificável.</p></div>
+      </section>
+
+      <section class="assistant-layout" aria-labelledby="assistant-title">
+        <div class="assistant-copy">
+          <p class="eyebrow">03 <span class="eyebrow-divider">/</span> CONSULTA ORIENTADA</p>
+          <h2 id="assistant-title">Pergunte ao <span>PG Bot.</span></h2>
+          <p>Consulte falhas, PRs, prioridades e o estado dos projetos. As respostas usam regras locais sobre o último relatório, sem gerar fatos não verificados.</p>
+          <div class="quick" role="group" aria-label="Perguntas rápidas">
+            <button data-prompt="Quais projetos falharam?" type="button">Falhas</button>
+            <button data-prompt="O que revisar primeiro?" type="button">Prioridades</button>
+            <button data-prompt="Quais PRs estão abertas?" type="button">PRs abertas</button>
+            <button data-prompt="Status do Arcade" type="button">Arcade</button>
+          </div>
+        </div>
+        <div class="dialog">
+          <div class="dialog-head"><span class="assistant-avatar" aria-hidden="true">PG</span><div><strong>PG Bot <span class="assistant-tag">/ Projetos</span></strong><small>Consulta local a um relatório do GitHub</small></div><span class="dialog-dot" aria-hidden="true"></span></div>
+          <div id="messages" role="log" aria-live="polite" aria-label="Mensagens">
+            <p class="message">Escolha uma pergunta rápida ou digite sua dúvida. Não vou presumir aprovações, merges ou publicações.</p>
+          </div>
+          <form id="ask">
+            <label for="question">Sua pergunta</label>
+            <div class="ask-row"><input id="question" name="question" maxlength="180" autocomplete="off" placeholder="Ex.: status do portfólio" required><button type="submit">Perguntar <span aria-hidden="true">↗</span></button></div>
+          </form>
+        </div>
+      </section>
+
+      <section class="disclaimer" aria-labelledby="safety-title">
+        <span class="safety-icon" aria-hidden="true">◎</span>
+        <div><h2 id="safety-title">Automação supervisionada</h2><p>A rotina agendada pode atualizar uma issue no próprio PG Bot. Ela não corrige código, aprova PRs, mescla alterações ou publica projetos. Essas etapas exigem autorização e testes próprios.</p></div>
+        <a href="https://github.com/pabloguilherme1121/PG-Bot/actions">Revisar workflows <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <footer><span>PG Bot · Central de Automações</span><span>Dados e recomendações dependem de evidência.</span><a href="https://github.com/pabloguilherme1121/PG-Bot">Código-fonte <span aria-hidden="true">↗</span></a></footer>
+  </div>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
