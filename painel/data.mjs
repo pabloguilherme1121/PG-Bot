@@ -16,6 +16,12 @@ export function auditProgress(state,project='all'){
  const done=list.filter(g=>verifiedGate(state,g)).length;
  return {done,total:list.length,percent:list.length?Math.round(done/list.length*100):0};
 }
+export function selectCurrentMainRun(workflowRuns,headSha,workflowName){
+ if(!Array.isArray(workflowRuns)||typeof headSha!=='string'||!/^[0-9a-f]{40}$/.test(headSha)||typeof workflowName!=='string')return null;
+ return workflowRuns
+  .filter(run=>run&&run.name===workflowName&&run.head_branch==='main'&&run.head_sha===headSha&&run.status==='completed')
+  .sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0))[0]||null;
+}
 export function mergeGithubPr(pr,payload,time){
  const mergedAt=typeof payload.merged_at==='string'&&Number.isFinite(Date.parse(payload.merged_at))?payload.merged_at:null;
  return {...pr,mergedAt,githubState:mergedAt?'merged':payload.state==='open'?'open':payload.state==='closed'?'closed':pr.githubState,lastChecked:time,source:'github-api'};
