@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeSeed, normalizeImport} from '../painel/data.mjs';
+import {makeSeed, normalizeImport, normalizeExternalBackup, verifiedGate} from '../painel/data.mjs';
 
 test('backup legítimo da homologação continua aceito',()=>{
  const seed=makeSeed();
@@ -38,4 +38,24 @@ test('importação rejeita datas malformadas que poderiam injetar HTML',()=>{
  const unsafeEvidence=makeSeed();
  unsafeEvidence.evidences[0].date='<svg/onload=alert(1)>';
  assert.throws(()=>normalizeImport(unsafeEvidence),/inválid/i);
+});
+
+test('backup recebido de fora não pode forjar revisão GitHub nem merge comprovado',()=>{
+ const original=makeSeed();
+ const gate=original.gates.find(g=>g.id==='str-ci');
+ assert.equal(verifiedGate(original,gate),true,'o snapshot embutido conserva seu contexto');
+ const attacker=structuredClone(original);
+ const proof=attacker.evidences.find(e=>e.id===gate.evidenceIds[0]);
+ proof.verified=true;
+ proof.source='github-api';
+ proof.note='Prova inserida no arquivo, sem nova consulta ao GitHub.';
+ const merged=attacker.prs.find(p=>p.mergedAt);
+ assert.ok(merged,'o snapshot precisa ter PR mesclada para verificar falsificação');
+ const imported=normalizeExternalBackup(attacker);
+ assert.equal(verifiedGate(imported,imported.gates.find(g=>g.id==='str-ci')),false,
+  'JSON importado não deve gerar gate com prova verificada sem consultar o GitHub');
+ assert.equal(imported.evidences.find(e=>e.id===proof.id).verified,false);
+ assert.equal(imported.prs.find(p=>p.id===merged.id).mergedAt,null,
+  'backup não comprova merge sem consultar a API');
+ assert.equal(imported.gates.find(g=>g.id==='str-ci').status,'em-validacao');
 });
