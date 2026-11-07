@@ -1,4 +1,4 @@
-import {makeSeed,auditProgress,verifiedGate,validProof,classifyEvidence,safeHttpUrl,normalizeImport,mergeGithubPr,REPO_OWNER,SNAPSHOT_AT} from './data.mjs';
+import {makeSeed,auditProgress,verifiedGate,validProof,classifyEvidence,safeHttpUrl,normalizeImport,normalizeExternalBackup,mergeGithubPr,REPO_OWNER,SNAPSHOT_AT} from './data.mjs';
 const STORAGE_KEY='pgbot-control-center-v1';
 const $=id=>document.getElementById(id);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -51,7 +51,7 @@ function saveModal(ev){ev.preventDefault();if(!modalConfig)return;const {type,id
  $('record-modal').close();modalConfig=null;persist();notify('Registro atualizado neste navegador.');
  }catch(e){notify(e.message||'Não foi possível salvar.');}}
 function downloadJson(){const json=JSON.stringify(state,null,2),blob=new Blob([json],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='pg-bot-control-center-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Backup JSON exportado.');}
-async function importJson(file){if(!file)return;if(file.size>2000000){notify('Arquivo maior que 2 MB.');return;}try{const imported=normalizeImport(JSON.parse(await file.text()));if(!window.confirm('Substituir registros locais pelo arquivo importado? Faça um backup antes.'))return;state=imported;persist();notify('Importação concluída.');}catch(e){notify('Falha ao importar: '+e.message);}}
+async function importJson(file){if(!file)return;if(file.size>2000000){notify('Arquivo maior que 2 MB.');return;}try{const imported=normalizeExternalBackup(JSON.parse(await file.text()));if(!window.confirm('Substituir registros locais pelo arquivo importado? Faça um backup antes.'))return;state=imported;persist();notify('Backup importado. Revalide evidências e merges no GitHub antes de marcar como comprovado.');}catch(e){notify('Falha ao importar: '+e.message);}}
 async function fetchJSON(url){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);try{const res=await fetch(url,{headers:{Accept:'application/vnd.github+json'},signal:controller.signal});if(!res.ok)throw Error('GitHub HTTP '+res.status);return await res.json();}finally{clearTimeout(timer);}}
 async function syncGitHub(){const btn=$('sync-btn');btn.disabled=true;btn.innerHTML='⟳ Consultando...';let ok=0,fail=0;const now=new Date().toISOString();try{
  // Apenas repositórios públicos, nunca exige tokens ou permissões de escrita.
