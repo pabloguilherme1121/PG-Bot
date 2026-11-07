@@ -23,9 +23,20 @@ test('service worker não intercepta nem o Arcade nem o Estratégia',()=>{
  assert.equal(handled,true);
 });
 
+test('offline devolve o conteúdo da versão atual, não de outro cache da mesma origem',async()=>{
+ const handlers=new Map();
+ const scope='https://example.test/PG-Bot/';
+ const self={location:{origin:'https://example.test'},registration:{scope},addEventListener(name,fn){handlers.set(name,fn)}};
+ const caches={match:async(_request,options)=>new Response(options?.cacheName==='pg-bot-shell-v6'?'atual':'outro cache')};
+ runInNewContext(readFileSync('sw.js','utf8'),{self,URL,Promise,Set,Response,caches,fetch:async()=>{throw new Error('offline')}});
+ let response;
+ handlers.get('fetch')({request:{method:'GET',mode:'navigate',url:scope},respondWith(value){response=value}});
+ assert.equal(await (await response).text(),'atual');
+});
+
 test('nova versão do PWA renova o cache sem excluir caches de outros projetos',()=>{
  const sw=readFileSync('sw.js','utf8');
- assert.ok(sw.includes("const CACHE='pg-bot-shell-v5'"));
+ assert.ok(sw.includes("const CACHE='pg-bot-shell-v6'"));
  assert.ok(sw.includes("'./favorites.mjs'"));
  assert.ok(sw.includes("'./recent.mjs'"));
  assert.ok(sw.includes("'./live-telemetry.mjs'"));
