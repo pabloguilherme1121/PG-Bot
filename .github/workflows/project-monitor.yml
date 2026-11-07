@@ -1,0 +1,32 @@
+name: PG Bot | Monitorar projetos
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 08h e 20h em Brasília (UTC-3). GitHub pode atrasar execuções agendadas.
+    - cron: '0 11,23 * * *'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: pg-bot-project-monitor
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    if: github.repository == 'pabloguilherme1121/PG-Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verificar lógica antes de coletar dados
+        run: node --test tests/project-automation.test.mjs tests/project-monitor-issues.test.mjs
+      - name: Consultar evidências e atualizar uma issue central
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/project-monitor.mjs --publish
