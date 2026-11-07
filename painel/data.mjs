@@ -66,6 +66,32 @@ export function normalizeImport(raw){
  if(bytes>2000000)throw Error('Arquivo muito grande.');
  return structuredClone(raw);
 }
+/**
+ * A JSON file cannot authenticate the origin of its own proof flags.
+ * Keep its notes and links, but ask for a fresh GitHub lookup or human review.
+ */
+export function normalizeExternalBackup(raw){
+ const state=normalizeImport(raw);
+ for(const evidence of state.evidences){
+  evidence.verified=false;
+  evidence.reviewed=false;
+ }
+ for(const pr of state.prs){
+  pr.mergedAt=null;
+  pr.githubState='em-validacao';
+  pr.lastChecked=null;
+  pr.source='backup';
+  for(const check of pr.checklist){
+   if(check.label==='Merge na main confirmado'||check.label==='Produção validada separadamente')
+    check.done=false;
+  }
+ }
+ for(const gate of state.gates){
+  if(gate.status==='comprovado'&&!verifiedGate(state,gate))gate.status='em-validacao';
+ }
+ state.lastGithubSync=null;
+ return state;
+}
 export function makeSeed(){
  const evidence=(id,project,title,url,kind='GitHub')=>({id,project,title,url,kind,source:'github-api',verified:true,reviewed:false,note:'Verificado por consulta ao GitHub; verificar SHA, escopo e data ao reutilizar.',date:'2026-11-03T01:45:00-03:00'});
  const evidences=[
