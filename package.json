@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "build": "node scripts/validate-site.mjs && node scripts/audit-catalog.mjs",
-    "test": "node --test tests/assistant.test.mjs tests/site.test.mjs tests/features.test.mjs tests/favorites.test.mjs tests/plan.test.mjs tests/recent.test.mjs tests/offline-guide.test.mjs tests/live-telemetry.test.mjs tests/catalog-audit.test.mjs tests/catalog-sync.test.mjs tests/game-manifest.test.mjs tests/painel-import.test.mjs tests/panel-import-hardening.test.mjs tests/painel-ci.test.mjs tests/project-automation.test.mjs tests/project-automation-actions.test.mjs tests/project-monitor-issues.test.mjs",
+    "test": "node --test tests/assistant.test.mjs tests/site.test.mjs tests/features.test.mjs tests/favorites.test.mjs tests/plan.test.mjs tests/recent.test.mjs tests/offline-guide.test.mjs tests/live-telemetry.test.mjs tests/catalog-audit.test.mjs tests/catalog-sync.test.mjs tests/game-manifest.test.mjs tests/painel-import.test.mjs tests/panel-import-hardening.test.mjs tests/painel-ci.test.mjs tests/project-automation.test.mjs tests/project-automation-actions.test.mjs tests/project-monitor-issues.test.mjs tests/ecosystem.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ci": "playwright test"
   },
