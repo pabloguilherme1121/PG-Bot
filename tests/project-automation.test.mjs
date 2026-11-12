@@ -84,3 +84,21 @@ test('parser recusa dados incompletos ou URLs injetadas no relatório',()=>{
  const malicious={...summary,workflows:[{...summary.workflows[0],url:'javascript:alert(1)'}]};
  assert.equal(parseReport(withData({...sample,projects:[malicious]})),null);
 });
+
+test('parser rejeita projetos repetidos para não inflar indicadores',()=>{
+ const sample=summarizeProject(repo,[run(80,'success')],[]);
+ const body=buildReport([sample,sample],'2026-11-11T19:00:00.000Z');
+ assert.equal(parseReport(body),null);
+});
+
+test('parser rejeita observações desproporcionais no snapshot',()=>{
+ const sample=summarizeProject(repo,[run(81,'success')],[]);
+ const body=buildReport([{...sample,note:'X'.repeat(10000)}],'2026-11-11T19:00:00.000Z');
+ assert.equal(parseReport(body),null);
+});
+
+test('parser rejeita snapshot com data no futuro além da tolerância',()=>{
+ const sample=summarizeProject(repo,[run(82,'success')],[]);
+ const tomorrow=new Date(Date.now()+24*60*60*1000).toISOString();
+ assert.equal(parseReport(buildReport([sample],tomorrow)),null);
+});
