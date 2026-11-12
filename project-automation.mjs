@@ -86,11 +86,15 @@ export function parseReport(body){
  if(!match)return null;
  try{
   const data=JSON.parse(match[1]);
-  if(data?.version!==1||!Number.isFinite(Date.parse(data.generatedAt))||!Array.isArray(data.projects))return null;
+  const createdAt=Date.parse(data?.generatedAt);
+  if(data?.version!==1||!Number.isFinite(createdAt)||createdAt>Date.now()+5*60*1000||!Array.isArray(data.projects))return null;
   if(data.projects.length>MONITORED_REPOS.length)return null;
+  const seenRepositories=new Set();
   if(data.projects.some(p=>{
    if(!p||!MONITORED_REPOS.includes(p.repository)||!Object.hasOwn(STATE_LABELS,p.state))return true;
-   if(typeof p.note!=='string'||!Array.isArray(p.workflows)||!Array.isArray(p.openPRs)||p.workflows.length>12||p.openPRs.length>15)return true;
+   if(seenRepositories.has(p.repository))return true;
+   seenRepositories.add(p.repository);
+   if(typeof p.note!=='string'||p.note.length>400||!Array.isArray(p.workflows)||!Array.isArray(p.openPRs)||p.workflows.length>12||p.openPRs.length>15)return true;
    const base='https://github.com/'+p.repository;
    if(p.workflows.some(w=>!w||!Number.isSafeInteger(w.id)||w.id<0||
     w.url!==(w.id?base+'/actions/runs/'+w.id:base+'/actions')))return true;
